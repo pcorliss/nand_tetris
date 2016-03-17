@@ -9,6 +9,9 @@
  *       0 otherwise
  */
 
+
+// !(!(a && b)) == a && b
+// !(!a && !b) == !!a || !!b == a || b
 CHIP Or {
     IN a, b;
     OUT out;
