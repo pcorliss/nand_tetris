@@ -58,5 +58,12 @@ CHIP ALU {
 
     Not16(in=xComboY, out=notXComboY);
 
-    Mux16(a=xComboY, b=notXComboY, sel=no, out=out);
+    Mux16(a=xComboY, b=notXComboY, sel=no, out=tempOut);
+
+    Or16(a=tempOut, b=false, out=out);
+
+    Or16Way(in=tempOut, out=anyTrue);
+    Not(in=anyTrue, out=zr);
+
+    Negative(in=tempOut, out=ng);
 }
