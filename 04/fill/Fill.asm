@@ -11,10 +11,10 @@
 // Put your code here.
 D=0
 @black
-M=D-1 // -1 is all bits on or BLACK
+M=D-1
 
-@white
-M=0 // 0 is all bits off or WHITE
+@color
+M=0
 
 @last
 M=0
@@ -22,20 +22,46 @@ M=0
 (LOOP)
   @KBD
   D=M
-  // if @last == 0 && @KBD > 0 then PAINT
-  // if @last > 0 && @KBD == 0 then CLEAR
 
-  // if @last == 0 && @KBD == 0 then do nothing
-  // if @last > 0 && @KBD > 0 then do nothing
-
-
-  @PAINT
+  @PAINTBLACK
   D;JGT // PAINT the screen if the KBD is pressed
-  @CLEAR
+  @PAINTWHITE
   D;JLE // CLEAR the screen if the KBD is not pressed
 
+(PAINTWHITE)
+  // KBD not pressed
+  @last
+  D=M
   @LOOP
-  0;JMP // Go back to loop
+  D;JLE // Short circuit if we're already all white (last == 0)
+
+  @last
+  M=0
+
+  @color
+  M=0 // White
+
+  @PAINT
+  0;JMP // Go To Paint
+
+(PAINTBLACK)
+  // KBD Pressed
+  @last
+  D=M
+  @LOOP
+  D;JGT // Short circuit if we're already all black (last == 1)
+
+  @last
+  M=1
+
+  @black
+  D=M
+  @color
+  M=D
+
+  // If I do nothing here executing will just continue to PAINT
+  //@PAINT
+  //0;JMP // Go To Paint
 
 (PAINT)
   @i
@@ -44,12 +70,20 @@ M=0
     @i
     D=M // Offset
 
-
     @SCREEN
-    A=A+D // New Address
-    D=0
-    M=D-1 // Set to BLACK
-    @i
+    D=A+D // New Address
+
+    @newAddress
+    M=D // Temporarily store a pointer to the new address
+
+    @color
+    D=M // Load up our color to paint
+
+    @newAddress
+    A=M // Switch to new address location
+    M=D // Paint
+
+    @i // Increment i
     M=M+1
     D=M
 
@@ -58,30 +92,6 @@ M=0
 
     @PLOOP
     D;JGT // PLOOP if (8192 - i) > 0
-
-  @LOOP
-  0;JMP
-
-(CLEAR)
-  @i
-  M=0
-  (CLOOP)
-    @i
-    D=M // Offset
-
-
-    @SCREEN
-    A=A+D // New Address
-    M=0 // Set to WHITE
-    @i
-    M=M+1
-    D=M
-
-    @8192
-    D=A-D // 8192 - i
-
-    @CLOOP
-    D;JGT // CLOOP if (8192 - i) > 0
 
   @LOOP
   0;JMP
