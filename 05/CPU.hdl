@@ -34,10 +34,80 @@ CHIP CPU {
                          // the current program (reset==0).
 
     OUT outM[16],        // M value output
-        writeM,          // Write to M? 
+        writeM,          // Write to M?
         addressM[15],    // Address in data memory (of M)
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+    // A-Instruction
+    // 0 v v v v v v v v v v v v v v v
+    // @7
+    // 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1
+
+    // C-Instruction
+    // 1 1 1 a c1 c2 c3 c4 c5 c6 d1 d2 d3 j1 j2 j3
+    // a,  ins[12], m when true, a when false
+    // c1, ins[11], alu zx
+    // c2, ins[10], alu nx
+    // c3, ins[9], alu zy
+    // c4, ins[8], alu ny
+    // c5, ins[7], alu f
+    // c6, ins[6], alu no
+    // d1, ins[5], store in ARegister
+    // d2, ins[4], store in DRegister
+    // d3, ins[3], store in Memory[A]
+    // j1, ins[2], <0
+    // j2, ins[1], =0
+    // j3, ins[0], >0
+
+    Not(in=instruction[15], out=AInst);
+    Not(in=AInst,           out=CInst);
+
+    // A Instruction or ALU Out
+    Mux16(a=aluOut, b=instruction, sel=AInst, out=inA);
+    // if AInstruction or d1 is true we store in the ARegister
+    Or(a=AInst, b=instruction[5], out=storeA);
+    ARegister(in=inA, load=storeA, out=outA, out[0..14]=addressM);
+
+    // Read from ARegister or Memory based on a
+    And(a=CInst, b=instruction[12], out=readMem);
+    Mux16(a=outA, b=inM, sel=readMem, out=amReg);
+
+    //Store ALU Out if d2 and C Instruction
+    And(a=CInst, b=instruction[4], out=storeD);
+    DRegister(in=aluOut, load=storeD, out=dReg);
+
+    // x is the DRegister
+    // y is the ARegister or Memory Muxed
+    ALU(
+      x=dReg, y=amReg,
+      zx=instruction[11], // c1
+      nx=instruction[10], // c2
+      zy=instruction[9],  // c3
+      ny=instruction[8],  // c4
+      f=instruction[7],   // c5
+      no=instruction[6],  // c6
+      zr=zero, ng=neg, // to control logic
+      out=outM, out=aluOut
+    );
+
+    // if !zero && !neg then positive
+    Or(a=zero, b=neg, out=zeroOrNeg);
+    Not(in=zeroOrNeg, out=pos);
+
+    // if (negative && j1) || (zero && j2) || (!zero && !negative && j3) then jump
+    // if jump && CInst then jump/load else inc
+    And(a=neg,  b=instruction[2], out=jlt); //j1, out < 0
+    And(a=zero, b=instruction[1], out=jeq); //j2, out = 0
+    And(a=pos,  b=instruction[0], out=jgt); //j3, out > 0
+
+    Or(a=jlt, b=jeq, out=or1);
+    Or(a=or1, b=jgt, out=jump);
+    And(a=CInst, b=jump, out=pcLoad);
+    Not(in=pcLoad, out=pcInc);
+
+    PC(in=outA, load=pcLoad, inc=pcInc, reset=reset, out[0..14]=pc);
+
+    // if C Instruction and d3 is set
+    And(a=CInst, b=instruction[3], out=writeM);
 }
