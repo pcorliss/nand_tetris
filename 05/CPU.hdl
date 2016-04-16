@@ -70,6 +70,8 @@ CHIP CPU {
     ARegister(in=inA, load=storeA, out=outA, out[0..14]=addressM);
 
     // Read from ARegister or Memory based on a
+    // May not need to specify that this should be read from a CInstruction
+    // Leaving it in just to be safe
     And(a=CInst, b=instruction[12], out=readMem);
     Mux16(a=outA, b=inM, sel=readMem, out=amReg);
 
