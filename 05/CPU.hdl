@@ -51,8 +51,8 @@ CHIP CPU {
     // c2, ins[10], alu nx
     // c3, ins[9], alu zy
     // c4, ins[8], alu ny
-    // c5, ins[7], alu f
-    // c6, ins[6], alu no
+    // c5, ins[7], alu f, if set then addition else &
+    // c6, ins[6], alu no, not
     // d1, ins[5], store in ARegister
     // d2, ins[4], store in DRegister
     // d3, ins[3], store in Memory[A]
