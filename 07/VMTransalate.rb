@@ -43,14 +43,14 @@ class Command
   def increment_sp
     <<-EOF
       @SP
-      M = M + 1 // Increment SP
+      M = M + 1\t// Increment SP
     EOF
   end
 
   def decrement_sp
     <<-EOF
       @SP
-      M = M - 1 // Decrement SP
+      M = M - 1\t// Decrement SP
     EOF
   end
 
@@ -59,15 +59,33 @@ class Command
       @SP
       A = M\t\t// Set Address to top of stack
       M = #{var_name}\t\t// RAM[SP] = #{var_name}
+      #{increment_sp}
     EOF
   end
 
   def get_stack
     <<-EOF
       @SP
-      A = M - 1\t\t// Set Address to top of stack minus 1
+      A = M - 1\t// Set Address to top of stack minus 1
       D = M\t\t// D = RAM[SP]
     EOF
+  end
+
+  OFFSET = {
+    'vm' => 13,
+    'temp' => 5,
+    'this' => 3,
+    'that' => 4,
+    'argument' => 2,
+    'local' => 1,
+  }
+
+  def offset(segment = @segment)
+    OFFSET[segment]
+  end
+
+  def target(segment = @segment, index = @i)
+    index.to_i + offset(segment)
   end
 end
 # add
@@ -86,15 +104,67 @@ class Add < Command
   def write
     <<-EOF
       // #{original_command}
-      #{Pop.new('temp', '0').write}
-      #{Pop.new('temp', '1').write}
-      @5\t\t// Temp 0
+      #{Pop.new('vm', '0').write}
+      #{Pop.new('vm', '1').write}
+      @#{target('vm', '0')}\t\t// Temp 0
       D = M
-      @6\t\t// Temp 1
+      @#{target('vm', '1')}\t\t// Temp 1
       D = M + D
       #{set_stack('D')}
-      #{increment_sp}
     EOF
+  end
+end
+
+class Sub < Command
+  def write
+    <<-EOF
+      // #{original_command}
+      #{Pop.new('vm', '0').write}
+      #{Pop.new('vm', '1').write}
+      @#{target('vm', '0')}\t\t// VM 0
+      D = M
+      @#{target('vm', '1')}\t\t// VM 1
+      D = M - D
+      #{set_stack('D')}
+    EOF
+  end
+end
+
+class Eq < Command
+
+  def truth
+    <<-EOF
+      // DAM
+      (TRUTH)
+      #{Push.new('constant', '-1').write}
+      @
+      0;JMP
+    EOF
+  end
+
+  def lies
+
+  end
+
+  def write
+    out = <<-EOF
+      // #{original_command}
+      #{Pop.new('vm', '0').write}
+      #{Pop.new('vm', '1').write}
+      @#{target('vm', '0')}\t\t// VM 0
+      D = M
+      @#{target('vm', '1')}\t\t// VM 1
+      D = M - D
+
+      @TRUE#{$label_counter}
+      D;JEQ\t\t// If D is zero skip next arg
+      D = 1
+      (TRUE#{$label_counter})
+      D = D - 1
+      #{set_stack('D')}
+    EOF
+    $label_counter += 1
+    out
   end
 end
 
@@ -104,8 +174,8 @@ class Pop < Command
     <<-EOF
       // #{original_command}
       #{get_stack}
-      @#{@i.to_i+5} // Set target to temp #{@i}
-      M = D // Set stack to temp var
+      @#{target}\t\t// Set target to #{@segment} #{@i}
+      M = D\t\t// Set stack to temp var
       #{decrement_sp}
     EOF
   end
@@ -120,7 +190,6 @@ class Push < Command
         @#{@i}\t\t// A = #{@i}
         D = A\t\t// D = #{@i}
         #{set_stack('D')}
-        #{increment_sp}
       EOF
     end
     out
@@ -137,6 +206,8 @@ end
 
 input = ARGF.read
 commands = []
+$label_counter = 0
+
 input.each_line do |line|
   #puts "Line: #{line}"
 
