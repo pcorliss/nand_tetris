@@ -74,41 +74,54 @@ class Command
   OFFSET = {
     'vm' => 13,
     'temp' => 5,
-    'this' => 3,
+    'this' => 3, # pointers
     'that' => 4,
     'argument' => 2,
     'local' => 1,
   }
 
-  def offset(segment = @segment)
+  def offset(segment)
     OFFSET[segment]
   end
 
+  def offset_str(index)
+    if index.to_i == 0
+      "\t\t"
+    else
+      " + #{index}\t"
+    end
+  end
+
   def target(segment = @segment, index = @i)
-    index.to_i + offset(segment)
+    if segment == 'vm' || segment == 'temp'
+      <<-EOF
+        @#{index.to_i + offset(segment)}\t\t// Target #{segment} #{index}
+      EOF
+    else
+      out = <<-EOF
+        @#{offset(segment)}\t\t// Target #{segment}
+        A = M\t\t// Offset #{index}
+      EOF
+      index.to_i.times do
+        out << "A = A + 1\t// So dumb...\n"
+      end
+      out
+    end
   end
 end
-# add
-# sub
-# neg
-# eq
-# gt
-# lt
-# and
-# or
-# not
-#
+
 # True == -1
 # False == 0
+
 class Add < Command
   def write
     <<-EOF
       // #{original_command}
       #{Pop.new('vm', '0').write}
       #{Pop.new('vm', '1').write}
-      @#{target('vm', '0')}\t\t// Temp 0
+      #{target('vm', '0')}
       D = M
-      @#{target('vm', '1')}\t\t// Temp 1
+      #{target('vm', '1')}
       D = M + D
       #{set_stack('D')}
     EOF
@@ -121,9 +134,9 @@ class Sub < Command
       // #{original_command}
       #{Pop.new('vm', '0').write}
       #{Pop.new('vm', '1').write}
-      @#{target('vm', '0')}\t\t// VM 0
+      #{target('vm', '0')}
       D = M
-      @#{target('vm', '1')}\t\t// VM 1
+      #{target('vm', '1')}
       D = M - D
       #{set_stack('D')}
     EOF
@@ -136,9 +149,9 @@ class Eq < Command
       // #{original_command}
       #{Pop.new('vm', '0').write}
       #{Pop.new('vm', '1').write}
-      @#{target('vm', '0')}\t\t// VM 0
+      #{target('vm', '0')}
       D = M
-      @#{target('vm', '1')}\t\t// VM 1
+      #{target('vm', '1')}
       D = M - D
 
       @TRUE#{$label_counter}
@@ -159,17 +172,17 @@ class Lt < Command
       // #{original_command}
       #{Pop.new('vm', '0').write}
       #{Pop.new('vm', '1').write}
-      @#{target('vm', '0')}\t\t// VM 0
+      #{target('vm', '0')}
       D = M
-      @#{target('vm', '1')}\t\t// VM 1
+      #{target('vm', '1')}
       D = M - D
       M = 0
       @TRUE#{$label_counter}
       D;JLT
-      @#{target('vm', '1')}\t\t// VM 1
+      #{target('vm', '1')}
       M = 1
       (TRUE#{$label_counter})
-      @#{target('vm', '1')}\t\t// VM 1
+      #{target('vm', '1')}
       D = M - 1
       #{set_stack('D')}
     EOF
@@ -184,17 +197,17 @@ class Gt < Command
       // #{original_command}
       #{Pop.new('vm', '0').write}
       #{Pop.new('vm', '1').write}
-      @#{target('vm', '0')}\t\t// VM 0
+      #{target('vm', '0')}
       D = M
-      @#{target('vm', '1')}\t\t// VM 1
+      #{target('vm', '1')}
       D = M - D
       M = 0
       @TRUE#{$label_counter}
       D;JGT
-      @#{target('vm', '1')}\t\t// VM 1
+      #{target('vm', '1')}
       M = 1
       (TRUE#{$label_counter})
-      @#{target('vm', '1')}\t\t// VM 1
+      #{target('vm', '1')}
       D = M - 1
       #{set_stack('D')}
     EOF
@@ -209,9 +222,9 @@ class And < Command
       // #{original_command}
       #{Pop.new('vm', '0').write}
       #{Pop.new('vm', '1').write}
-      @#{target('vm', '0')}\t\t// VM 0
+      #{target('vm', '0')}
       D = M
-      @#{target('vm', '1')}\t\t// VM 1
+      #{target('vm', '1')}
       D = D & M\t// Bitwise and D & M
       #{set_stack('D')}
     EOF
@@ -226,9 +239,9 @@ class Or < Command
       // #{original_command}
       #{Pop.new('vm', '0').write}
       #{Pop.new('vm', '1').write}
-      @#{target('vm', '0')}\t\t// VM 0
+      #{target('vm', '0')}
       D = M
-      @#{target('vm', '1')}\t\t// VM 1
+      #{target('vm', '1')}
       D = D | M\t// Bitwise Or D | M
       #{set_stack('D')}
     EOF
@@ -242,7 +255,7 @@ class Not < Command
     out = <<-EOF
       // #{original_command}
       #{Pop.new('vm', '0').write}
-      @#{target('vm', '0')}\t\t// VM 0
+      #{target('vm', '0')}
       D = M
       D = !D\t\t// Bitwise Not D
       #{set_stack('D')}
@@ -257,7 +270,7 @@ class Neg < Command
     out = <<-EOF
       // #{original_command}
       #{Pop.new('vm', '0').write}
-      @#{target('vm', '0')}\t\t// VM 0
+      #{target('vm', '0')}
       D = -M\t\t// Negate M
       #{set_stack('D')}
     EOF
@@ -272,8 +285,8 @@ class Pop < Command
     <<-EOF
       // #{original_command}
       #{get_stack}
-      @#{target}\t\t// Set target to #{@segment} #{@i}
-      M = D\t\t// Set stack to temp var
+      #{target}
+      M = D\t\t// Set target to stack var
       #{decrement_sp}
     EOF
   end
