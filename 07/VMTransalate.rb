@@ -131,21 +131,6 @@ class Sub < Command
 end
 
 class Eq < Command
-
-  def truth
-    <<-EOF
-      // DAM
-      (TRUTH)
-      #{Push.new('constant', '-1').write}
-      @
-      0;JMP
-    EOF
-  end
-
-  def lies
-
-  end
-
   def write
     out = <<-EOF
       // #{original_command}
@@ -161,6 +146,56 @@ class Eq < Command
       D = 1
       (TRUE#{$label_counter})
       D = D - 1
+      #{set_stack('D')}
+    EOF
+    $label_counter += 1
+    out
+  end
+end
+
+class Lt < Command
+  def write
+    out = <<-EOF
+      // #{original_command}
+      #{Pop.new('vm', '0').write}
+      #{Pop.new('vm', '1').write}
+      @#{target('vm', '0')}\t\t// VM 0
+      D = M
+      @#{target('vm', '1')}\t\t// VM 1
+      D = M - D
+      M = 0
+      @TRUE#{$label_counter}
+      D;JLT
+      @#{target('vm', '1')}\t\t// VM 1
+      M = 1
+      (TRUE#{$label_counter})
+      @#{target('vm', '1')}\t\t// VM 1
+      D = M - 1
+      #{set_stack('D')}
+    EOF
+    $label_counter += 1
+    out
+  end
+end
+
+class Gt < Command
+  def write
+    out = <<-EOF
+      // #{original_command}
+      #{Pop.new('vm', '0').write}
+      #{Pop.new('vm', '1').write}
+      @#{target('vm', '0')}\t\t// VM 0
+      D = M
+      @#{target('vm', '1')}\t\t// VM 1
+      D = M - D
+      M = 0
+      @TRUE#{$label_counter}
+      D;JGT
+      @#{target('vm', '1')}\t\t// VM 1
+      M = 1
+      (TRUE#{$label_counter})
+      @#{target('vm', '1')}\t\t// VM 1
+      D = M - 1
       #{set_stack('D')}
     EOF
     $label_counter += 1
