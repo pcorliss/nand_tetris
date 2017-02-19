@@ -203,6 +203,69 @@ class Gt < Command
   end
 end
 
+class And < Command
+  def write
+    out = <<-EOF
+      // #{original_command}
+      #{Pop.new('vm', '0').write}
+      #{Pop.new('vm', '1').write}
+      @#{target('vm', '0')}\t\t// VM 0
+      D = M
+      @#{target('vm', '1')}\t\t// VM 1
+      D = D & M\t// Bitwise and D & M
+      #{set_stack('D')}
+    EOF
+    $label_counter += 1
+    out
+  end
+end
+
+class Or < Command
+  def write
+    out = <<-EOF
+      // #{original_command}
+      #{Pop.new('vm', '0').write}
+      #{Pop.new('vm', '1').write}
+      @#{target('vm', '0')}\t\t// VM 0
+      D = M
+      @#{target('vm', '1')}\t\t// VM 1
+      D = D | M\t// Bitwise Or D | M
+      #{set_stack('D')}
+    EOF
+    $label_counter += 1
+    out
+  end
+end
+
+class Not < Command
+  def write
+    out = <<-EOF
+      // #{original_command}
+      #{Pop.new('vm', '0').write}
+      @#{target('vm', '0')}\t\t// VM 0
+      D = M
+      D = !D\t\t// Bitwise Not D
+      #{set_stack('D')}
+    EOF
+    $label_counter += 1
+    out
+  end
+end
+
+class Neg < Command
+  def write
+    out = <<-EOF
+      // #{original_command}
+      #{Pop.new('vm', '0').write}
+      @#{target('vm', '0')}\t\t// VM 0
+      D = -M\t\t// Negate M
+      #{set_stack('D')}
+    EOF
+    $label_counter += 1
+    out
+  end
+end
+
 # pop segment i
 class Pop < Command
   def write
