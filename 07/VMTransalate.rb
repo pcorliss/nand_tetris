@@ -295,15 +295,15 @@ end
 # push segment i
 class Push < Command
   def write
+    out = "// #{original_command}\n"
     if(@segment == 'constant')
-      out = <<-EOF
-        // #{original_command}
-        @#{@i}\t\t// A = #{@i}
-        D = A\t\t// D = #{@i}
-        #{set_stack('D')}
-      EOF
+      out << "@#{@i}\t\t// A = #{@i}\n"
+      out << "D = A\t\t// D = #{@i}\n"
+    else
+      out << "#{target}\n"
+      out << "D = M\t\t// D = #{@i}\n"
     end
-    out
+    out << "#{set_stack('D')}"
   end
 end
 
