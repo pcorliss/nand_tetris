@@ -75,11 +75,14 @@ class Command
     'vm' => 13,
     'temp' => 5,
     'static' => 16,
+    'pointer' => 3,
     'this' => 3, # pointers
     'that' => 4, # pointers
     'argument' => 2,
     'local' => 1,
   }
+
+  DIRECT_SEGMENTS = ['vm', 'temp', 'static', 'pointer']
 
   def offset(segment)
     OFFSET[segment]
@@ -94,7 +97,7 @@ class Command
   end
 
   def target(segment = @segment, index = @i)
-    if segment == 'vm' || segment == 'temp' || segment == 'static'
+    if DIRECT_SEGMENTS.include? segment
       <<-EOF
         @#{index.to_i + offset(segment)}\t\t// Target #{segment} #{index}
       EOF
