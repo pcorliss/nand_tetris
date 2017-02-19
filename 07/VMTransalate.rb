@@ -74,8 +74,9 @@ class Command
   OFFSET = {
     'vm' => 13,
     'temp' => 5,
+    'static' => 16,
     'this' => 3, # pointers
-    'that' => 4,
+    'that' => 4, # pointers
     'argument' => 2,
     'local' => 1,
   }
@@ -93,7 +94,7 @@ class Command
   end
 
   def target(segment = @segment, index = @i)
-    if segment == 'vm' || segment == 'temp'
+    if segment == 'vm' || segment == 'temp' || segment == 'static'
       <<-EOF
         @#{index.to_i + offset(segment)}\t\t// Target #{segment} #{index}
       EOF
