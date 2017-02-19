@@ -1,4 +1,4 @@
-### Ruby shebang
+#!/usr/bin/env ruby
 
 # VM Translator
 # In: 1 or more VM files, either a vm file or directory of vm files
@@ -318,6 +318,7 @@ end
 # detect command
 # load arguments
 
+output_file = ARGV[0].sub(/\.vm$/,'.asm')
 
 input = ARGF.read
 commands = []
@@ -339,4 +340,6 @@ input.each_line do |line|
   end
 end
 
-puts commands.map(&:write).join("\n").gsub(/^\s+/m, "")
+File.open(output_file, 'w') do |fh|
+  fh.puts commands.map(&:write).join("\n").gsub(/^\s+/m, "")
+end
