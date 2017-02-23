@@ -30,7 +30,11 @@ class Command
   end
 
   def self.parse(cmd, segment, i)
-    Object.const_get(cmd.capitalize).new(segment, i)
+    if cmd == 'if-goto'
+      IfGoto.new(segment, i)
+    else
+      Object.const_get(cmd.capitalize).new(segment, i)
+    end
   end
 
   def original_command
@@ -112,6 +116,10 @@ class Command
       out
     end
   end
+
+  def cmd_write
+    "// #{original_command}\n#{write}"
+  end
 end
 
 # True == -1
@@ -120,7 +128,6 @@ end
 class Add < Command
   def write
     <<-EOF
-      // #{original_command}
       #{Pop.new('vm', '0').write}
       #{Pop.new('vm', '1').write}
       #{target('vm', '0')}
@@ -135,7 +142,6 @@ end
 class Sub < Command
   def write
     <<-EOF
-      // #{original_command}
       #{Pop.new('vm', '0').write}
       #{Pop.new('vm', '1').write}
       #{target('vm', '0')}
@@ -150,7 +156,6 @@ end
 class Eq < Command
   def write
     out = <<-EOF
-      // #{original_command}
       #{Pop.new('vm', '0').write}
       #{Pop.new('vm', '1').write}
       #{target('vm', '0')}
@@ -173,7 +178,6 @@ end
 class Lt < Command
   def write
     out = <<-EOF
-      // #{original_command}
       #{Pop.new('vm', '0').write}
       #{Pop.new('vm', '1').write}
       #{target('vm', '0')}
@@ -198,7 +202,6 @@ end
 class Gt < Command
   def write
     out = <<-EOF
-      // #{original_command}
       #{Pop.new('vm', '0').write}
       #{Pop.new('vm', '1').write}
       #{target('vm', '0')}
@@ -223,7 +226,6 @@ end
 class And < Command
   def write
     out = <<-EOF
-      // #{original_command}
       #{Pop.new('vm', '0').write}
       #{Pop.new('vm', '1').write}
       #{target('vm', '0')}
@@ -240,7 +242,6 @@ end
 class Or < Command
   def write
     out = <<-EOF
-      // #{original_command}
       #{Pop.new('vm', '0').write}
       #{Pop.new('vm', '1').write}
       #{target('vm', '0')}
@@ -257,7 +258,6 @@ end
 class Not < Command
   def write
     out = <<-EOF
-      // #{original_command}
       #{Pop.new('vm', '0').write}
       #{target('vm', '0')}
       D = M
@@ -272,7 +272,6 @@ end
 class Neg < Command
   def write
     out = <<-EOF
-      // #{original_command}
       #{Pop.new('vm', '0').write}
       #{target('vm', '0')}
       D = -M\t\t// Negate M
@@ -287,7 +286,6 @@ end
 class Pop < Command
   def write
     <<-EOF
-      // #{original_command}
       #{get_stack}
       #{target}
       M = D\t\t// Set target to stack var
@@ -299,7 +297,7 @@ end
 # push segment i
 class Push < Command
   def write
-    out = "// #{original_command}\n"
+    out = ""
     if(@segment == 'constant')
       out << "@#{@i}\t\t// A = #{@i}\n"
       out << "D = A\t\t// D = #{@i}\n"
@@ -311,6 +309,29 @@ class Push < Command
   end
 end
 
+# The scope of the label is the function in which it is defined.
+# The label is an arbitrary string composed of any sequence of
+# letters, digits, underscore (_), dot (.), and colon (:)
+# that does not begin with a digit.
+class Label < Command
+  def write
+    <<-EOF
+      (#{@segment})
+    EOF
+  end
+end
+
+class IfGoto < Command
+  def write
+    <<-EOF
+      #{Pop.new('vm', '0').write}
+      #{target('vm', '0')}
+      D=M
+      @#{@segment}
+      D;JNE
+    EOF
+  end
+end
 
 # Parser
 # read in from stdin or from file
@@ -327,11 +348,11 @@ $label_counter = 0
 input.each_line do |line|
   #puts "Line: #{line}"
 
-  if(line.start_with?('//'))
-     next
+  if (line.start_with?('//'))
+    next
   end
 
-  if(line[/^\s*(\w+)\s*(\w*)\s*(\w*)/])
+  if (line[/^\s*([-\w]+)\s*(\w*)\s*(\w*)/])
     cmd = $1
     arg1 = $2
     arg2 = $3
@@ -341,5 +362,5 @@ input.each_line do |line|
 end
 
 File.open(output_file, 'w') do |fh|
-  fh.puts commands.map(&:write).join("\n").gsub(/^\s+/m, "")
+  fh.puts commands.map(&:cmd_write).join("\n").gsub(/^\s+/m, "")
 end
