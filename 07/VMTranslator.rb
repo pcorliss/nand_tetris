@@ -333,6 +333,15 @@ class IfGoto < Command
   end
 end
 
+class Goto < Command
+  def write
+    <<-EOF
+      @#{@segment}
+      0;JMP
+    EOF
+  end
+end
+
 # Parser
 # read in from stdin or from file
 # Ignore comments `//`
