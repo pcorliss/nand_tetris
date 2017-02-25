@@ -70,7 +70,7 @@ class Command
   def get_stack
     <<-EOF
       @SP
-      A = M - 1\t// Set Address to top of stack minus 3
+      A = M - 1\t// Set Address to top of stack minus 1
       D = M\t\t// D = RAM[SP]
     EOF
   end
