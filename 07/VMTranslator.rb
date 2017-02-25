@@ -303,7 +303,7 @@ class Push < Command
       out << "D = A\t\t// D = #{@i}\n"
     elsif(@segment == 'segment')
       out << "@#{@i}\t\t// A = #{@i}\n"
-      out << "D = A\t\t// D = #{@i}\n"
+      out << "D = M\t\t// D = #{@i}\n"
     else
       out << "#{target}\n"
       out << "D = M\t\t// D = #{@i}\n"
@@ -319,7 +319,7 @@ end
 class Label < Command
   def write
     <<-EOF
-      (#{@segment})
+      (#{$current_function}$#{@segment})
     EOF
   end
 end
@@ -339,7 +339,7 @@ end
 class Goto < Command
   def write
     <<-EOF
-      @#{@segment}
+      @#{$current_function}$#{@segment}
       0;JMP
     EOF
   end
@@ -347,6 +347,7 @@ end
 
 class Function < Command
   def write
+    $current_function = @segment
     out = ""
     out << "(#{@segment}) // I think function names are globally unique\n"
     @i.to_i.times do |j|
@@ -366,7 +367,8 @@ class Return < Command
     M = D
     // retAddr = *(frame-5) // retAddr is a temp. variable
     @5
-    D = D - A
+    A = D - A
+    D = M
     #{target('vm', '1')}
     M = D
     // *ARG = pop // repositions the return value for the caller
@@ -418,12 +420,12 @@ class Call < Command
     out = <<-EOF
       // we assume that nArgs arguments have been pushed
       // call segment numArgs
-      #{Push.new('segment', "returnAddress#{$label_counter}").write}
+      #{Push.new('constant', "returnAddress#{$label_counter}").write}
       #{Push.new('segment', 'LCL').write}
       #{Push.new('segment', 'ARG').write}
       #{Push.new('segment', 'THIS').write}
       #{Push.new('segment', 'THAT').write}
-      @#{5 + @i}
+      @#{5 + @i.to_i}
       D = A
       @SP
       D = M - D
@@ -433,8 +435,9 @@ class Call < Command
       D = M
       @LCL
       M = D\t\t// LCL = SP # repositions LCL for g
-      #{Goto.new(@segment)}
-      (returnAddress#{$label_counter})
+      @#{@segment}
+      0;JMP
+      (returnAddress#{$label_counter}) // Return
     EOF
     $label_counter += 1
     out
@@ -452,6 +455,7 @@ output_file = ARGV[0].sub(/\.vm$/,'.asm')
 input = ARGF.read
 commands = []
 $label_counter = 0
+$current_function = ''
 
 input.each_line do |line|
   #puts "Line: #{line}"
