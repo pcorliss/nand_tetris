@@ -330,7 +330,7 @@ class IfGoto < Command
       #{Pop.new('vm', '0').write}
       #{target('vm', '0')}
       D=M
-      @#{@segment}
+      @#{$current_function}$#{@segment}
       D;JNE
     EOF
   end
@@ -462,9 +462,24 @@ end
 # detect command
 # load arguments
 
-output_file = ARGV[0].sub(/\.vm$/,'.asm')
 
-input = ARGF.read
+
+require 'pathname'
+path = Pathname.new(ARGV[0])
+
+#require 'pry'
+#binding.pry
+
+if path.file?
+  output_file = ARGV[0].sub(/\.vm$/,'.asm')
+  input = ARGF.read
+else
+  output_file = "#{path}/#{path.basename}.asm"
+  input = path.children.map(&:to_s).grep(/\.vm$/).map do |f|
+    File.read(f)
+  end.join("\n")
+end
+
 commands = [Bootstrap.new('', '')]
 $label_counter = 0
 $current_function = ''
