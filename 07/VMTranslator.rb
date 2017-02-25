@@ -70,7 +70,7 @@ class Command
   def get_stack
     <<-EOF
       @SP
-      A = M - 1\t// Set Address to top of stack minus 1
+      A = M - 1\t// Set Address to top of stack minus 3
       D = M\t\t// D = RAM[SP]
     EOF
   end
@@ -301,6 +301,9 @@ class Push < Command
     if(@segment == 'constant')
       out << "@#{@i}\t\t// A = #{@i}\n"
       out << "D = A\t\t// D = #{@i}\n"
+    elsif(@segment == 'segment')
+      out << "@#{@i}\t\t// A = #{@i}\n"
+      out << "D = A\t\t// D = #{@i}\n"
     else
       out << "#{target}\n"
       out << "D = M\t\t// D = #{@i}\n"
@@ -342,6 +345,83 @@ class Goto < Command
   end
 end
 
+class Function < Command
+  def write
+    out = ""
+    out << "(#{@segment}) // I think function names are globally unique\n"
+    @i.to_i.times do |j|
+      out << "#{Push.new('constant', '0').write}"
+    end
+    out
+  end
+end
+
+class Return < Command
+  def write
+    <<-EOF
+      // Line: 132
+      @LCL
+      D = M
+      #{target('temp', '0')}
+      M = D // frame, temp 0 <= LCL
+
+      // *ARG = pop // repositions the return value for the caller
+      #{Pop.new('vm', '0').write}
+      #{target('vm', '0')}
+      D = M
+      @ARG
+      M = D
+
+      @ARG
+      D = A + 1
+      @SP
+      M = D\t\t// SP=ARG+1 // restores the caller’s SP
+
+      #{target('temp', '0')} // frame, temp 0
+      D = M
+      @THAT
+      MD = D - 1\t// THAT = *(frame-1) // restores the caller’s THAT
+      @THIS
+      MD = D - 1\t// THIS = *(frame-2) // restores the caller’s THIS
+      @ARG
+      MD = D - 1\t// ARG = *(frame-3) // restores the caller’s ARG
+      @LCL
+      MD = D - 1\t// LCL = *(frame-4) // restores the caller’s LCL
+
+      A = D - 1\t// retAddr = *(frame-5) // retAddr is a temp. variable
+      0;JMP\t\t// goto retAddr // goto returnAddress
+    EOF
+  end
+end
+
+class Call < Command
+  def write
+    out = <<-EOF
+      // we assume that nArgs arguments have been pushed
+      // call segment numArgs
+      #{Push.new('segment', "returnAddress#{$label_counter}").write}
+      #{Push.new('segment', 'LCL').write}
+      #{Push.new('segment', 'ARG').write}
+      #{Push.new('segment', 'THIS').write}
+      #{Push.new('segment', 'THAT').write}
+      @#{5 + @i}
+      D = A
+      @SP
+      D = M - D
+      @#{OFFSET['argument']}
+      M = D\t\t// ARG = SP-nArgs-5
+      @SP
+      D = M
+      @LCL
+      M = D\t\t// LCL = SP # repositions LCL for g
+      #{Goto.new(@segment)}
+      (returnAddress#{$label_counter})
+    EOF
+    $label_counter += 1
+    out
+  end
+end
+
 # Parser
 # read in from stdin or from file
 # Ignore comments `//`
@@ -361,7 +441,7 @@ input.each_line do |line|
     next
   end
 
-  if (line[/^\s*([-\w]+)\s*(\w*)\s*(\w*)/])
+  if (line[/^\s*([-\w]+)\s*([\w\.]*)\s*(\w*)/])
     cmd = $1
     arg1 = $2
     arg2 = $3
