@@ -494,8 +494,10 @@ $label_counter = 0
 $current_function = nil
 
 File.open(output_file, 'w') do |fh_out|
-  commands = [Bootstrap.new('', '')]
-  fh_out.puts commands.map(&:cmd_write).join("\n").gsub(/^\s+/m, "")
+  if files.size > 1
+    commands = [Bootstrap.new('', '')]
+    fh_out.puts commands.map(&:cmd_write).join("\n").gsub(/^\s+/m, "")
+  end
 
   files.each do |file_name|
     commands = []

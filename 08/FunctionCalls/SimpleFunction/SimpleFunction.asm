@@ -35,14 +35,14 @@ M = D		// RAM[SP] = D
 M = M + 1	// Increment SP
 // add
 @SP
-A = M - 1	// Set Address to top of stack minus 3
+A = M - 1	// Set Address to top of stack minus 1
 D = M		// D = RAM[SP]
 @13		// Target vm 0
 M = D		// Set target to stack var
 @SP
 M = M - 1	// Decrement SP
 @SP
-A = M - 1	// Set Address to top of stack minus 3
+A = M - 1	// Set Address to top of stack minus 1
 D = M		// D = RAM[SP]
 @14		// Target vm 1
 M = D		// Set target to stack var
@@ -59,7 +59,7 @@ M = D		// RAM[SP] = D
 M = M + 1	// Increment SP
 // not
 @SP
-A = M - 1	// Set Address to top of stack minus 3
+A = M - 1	// Set Address to top of stack minus 1
 D = M		// D = RAM[SP]
 @13		// Target vm 0
 M = D		// Set target to stack var
@@ -84,14 +84,14 @@ M = D		// RAM[SP] = D
 M = M + 1	// Increment SP
 // add
 @SP
-A = M - 1	// Set Address to top of stack minus 3
+A = M - 1	// Set Address to top of stack minus 1
 D = M		// D = RAM[SP]
 @13		// Target vm 0
 M = D		// Set target to stack var
 @SP
 M = M - 1	// Decrement SP
 @SP
-A = M - 1	// Set Address to top of stack minus 3
+A = M - 1	// Set Address to top of stack minus 1
 D = M		// D = RAM[SP]
 @14		// Target vm 1
 M = D		// Set target to stack var
@@ -118,14 +118,14 @@ M = D		// RAM[SP] = D
 M = M + 1	// Increment SP
 // sub
 @SP
-A = M - 1	// Set Address to top of stack minus 3
+A = M - 1	// Set Address to top of stack minus 1
 D = M		// D = RAM[SP]
 @13		// Target vm 0
 M = D		// Set target to stack var
 @SP
 M = M - 1	// Decrement SP
 @SP
-A = M - 1	// Set Address to top of stack minus 3
+A = M - 1	// Set Address to top of stack minus 1
 D = M		// D = RAM[SP]
 @14		// Target vm 1
 M = D		// Set target to stack var
@@ -148,7 +148,8 @@ D = M
 M = D
 // retAddr = *(frame-5) // retAddr is a temp. variable
 @5
-D = D - A
+A = D - A
+D = M
 @14		// Target vm 1
 M = D
 // *ARG = pop // repositions the return value for the caller
