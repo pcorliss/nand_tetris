@@ -1,38 +1,9 @@
-// function Sys.init 0
-(Sys.init) // I think function names are globally unique
-// push constant 4000
-@4000		// A = 4000
-D = A		// D = 4000
+// bootstrap
+@256 // SP = 256
+D = A
 @SP
-A = M		// Set Address to top of stack
-M = D		// RAM[SP] = D
-@SP
-M = M + 1	// Increment SP
-// pop pointer 0
-@SP
-A = M - 1	// Set Address to top of stack minus 1
-D = M		// D = RAM[SP]
-@3		// Target pointer 0
-M = D		// Set target to stack var
-@SP
-M = M - 1	// Decrement SP
-// push constant 5000
-@5000		// A = 5000
-D = A		// D = 5000
-@SP
-A = M		// Set Address to top of stack
-M = D		// RAM[SP] = D
-@SP
-M = M + 1	// Increment SP
-// pop pointer 1
-@SP
-A = M - 1	// Set Address to top of stack minus 1
-D = M		// D = RAM[SP]
-@4		// Target pointer 1
-M = D		// Set target to stack var
-@SP
-M = M - 1	// Decrement SP
-// call Sys.main 0
+M = D
+// call Sys.init 0
 // we assume that nArgs arguments have been pushed
 // call segment numArgs
 @returnAddress0		// A = returnAddress0
@@ -80,9 +51,94 @@ M = D		// ARG = SP-nArgs-5
 D = M
 @LCL
 M = D		// LCL = SP # repositions LCL for g
-@Sys.main
+@Sys.init
 0;JMP
 (returnAddress0) // Return
+// function Sys.init 0
+(Sys.init) // I think function names are globally unique
+// push constant 4000
+@4000		// A = 4000
+D = A		// D = 4000
+@SP
+A = M		// Set Address to top of stack
+M = D		// RAM[SP] = D
+@SP
+M = M + 1	// Increment SP
+// pop pointer 0
+@SP
+A = M - 1	// Set Address to top of stack minus 1
+D = M		// D = RAM[SP]
+@3		// Target pointer 0
+M = D		// Set target to stack var
+@SP
+M = M - 1	// Decrement SP
+// push constant 5000
+@5000		// A = 5000
+D = A		// D = 5000
+@SP
+A = M		// Set Address to top of stack
+M = D		// RAM[SP] = D
+@SP
+M = M + 1	// Increment SP
+// pop pointer 1
+@SP
+A = M - 1	// Set Address to top of stack minus 1
+D = M		// D = RAM[SP]
+@4		// Target pointer 1
+M = D		// Set target to stack var
+@SP
+M = M - 1	// Decrement SP
+// call Sys.main 0
+// we assume that nArgs arguments have been pushed
+// call segment numArgs
+@returnAddress1		// A = returnAddress1
+D = A		// D = returnAddress1
+@SP
+A = M		// Set Address to top of stack
+M = D		// RAM[SP] = D
+@SP
+M = M + 1	// Increment SP
+@LCL		// A = LCL
+D = M		// D = LCL
+@SP
+A = M		// Set Address to top of stack
+M = D		// RAM[SP] = D
+@SP
+M = M + 1	// Increment SP
+@ARG		// A = ARG
+D = M		// D = ARG
+@SP
+A = M		// Set Address to top of stack
+M = D		// RAM[SP] = D
+@SP
+M = M + 1	// Increment SP
+@THIS		// A = THIS
+D = M		// D = THIS
+@SP
+A = M		// Set Address to top of stack
+M = D		// RAM[SP] = D
+@SP
+M = M + 1	// Increment SP
+@THAT		// A = THAT
+D = M		// D = THAT
+@SP
+A = M		// Set Address to top of stack
+M = D		// RAM[SP] = D
+@SP
+M = M + 1	// Increment SP
+@5
+D = A
+@SP
+D = M - D
+@2
+M = D		// ARG = SP-nArgs-5
+@SP
+D = M
+@LCL
+M = D		// LCL = SP # repositions LCL for g
+@Sys.main
+0;JMP
+(returnAddress1) // Return
 // pop temp 1
 @SP
 A = M - 1	// Set Address to top of stack minus 1
@@ -233,8 +289,8 @@ M = M + 1	// Increment SP
 // call Sys.add12 1
 // we assume that nArgs arguments have been pushed
 // call segment numArgs
-@returnAddress1		// A = returnAddress1
-D = A		// D = returnAddress1
+@returnAddress2		// A = returnAddress2
+D = A		// D = returnAddress2
 @SP
 A = M		// Set Address to top of stack
 M = D		// RAM[SP] = D
@@ -280,7 +336,7 @@ D = M
 M = D		// LCL = SP # repositions LCL for g
 @Sys.add12
 0;JMP
-(returnAddress1) // Return
+(returnAddress2) // Return
 // pop temp 0
 @SP
 A = M - 1	// Set Address to top of stack minus 1

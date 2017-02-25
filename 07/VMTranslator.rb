@@ -444,6 +444,18 @@ class Call < Command
   end
 end
 
+class Bootstrap < Command
+  def write
+    <<-EOF
+      @256 // SP = 256
+      D = A
+      @SP
+      M = D
+      #{Call.new('Sys.init', '0').cmd_write}
+    EOF
+  end
+end
+
 # Parser
 # read in from stdin or from file
 # Ignore comments `//`
@@ -453,7 +465,7 @@ end
 output_file = ARGV[0].sub(/\.vm$/,'.asm')
 
 input = ARGF.read
-commands = []
+commands = [Bootstrap.new('', '')]
 $label_counter = 0
 $current_function = ''
 
