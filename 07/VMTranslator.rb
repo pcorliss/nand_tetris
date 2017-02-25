@@ -359,37 +359,56 @@ end
 class Return < Command
   def write
     <<-EOF
-      // Line: 132
-      @LCL
-      D = M
-      #{target('temp', '0')}
-      M = D // frame, temp 0 <= LCL
-
-      // *ARG = pop // repositions the return value for the caller
-      #{Pop.new('vm', '0').write}
-      #{target('vm', '0')}
-      D = M
-      @ARG
-      M = D
-
-      @ARG
-      D = A + 1
-      @SP
-      M = D\t\t// SP=ARG+1 // restores the caller’s SP
-
-      #{target('temp', '0')} // frame, temp 0
-      D = M
-      @THAT
-      MD = D - 1\t// THAT = *(frame-1) // restores the caller’s THAT
-      @THIS
-      MD = D - 1\t// THIS = *(frame-2) // restores the caller’s THIS
-      @ARG
-      MD = D - 1\t// ARG = *(frame-3) // restores the caller’s ARG
-      @LCL
-      MD = D - 1\t// LCL = *(frame-4) // restores the caller’s LCL
-
-      A = D - 1\t// retAddr = *(frame-5) // retAddr is a temp. variable
-      0;JMP\t\t// goto retAddr // goto returnAddress
+    // frame = LCL // frame is a temp. variable
+    @LCL
+    D = M
+    #{target('vm', '0')}
+    M = D
+    // retAddr = *(frame-5) // retAddr is a temp. variable
+    @5
+    D = D - A
+    #{target('vm', '1')}
+    M = D
+    // *ARG = pop // repositions the return value for the caller
+    @SP
+    A = M - 1
+    D = M
+    @ARG
+    A = M
+    M = D
+    // SP=ARG+1 // restores the caller’s SP
+    @ARG
+    D = M + 1
+    @SP
+    M = D
+    // THAT = *(frame-1) // restores the caller’s THAT
+    #{target('vm', '0')}
+    AM = M - 1
+    D = M
+    @THAT
+    M = D
+    // THIS = *(frame-2) // restores the caller’s THIS
+    #{target('vm', '0')}
+    AM = M - 1
+    D = M
+    @THIS
+    M = D
+    // ARG = *(frame-3) // restores the caller’s ARG
+    #{target('vm', '0')}
+    AM = M - 1
+    D = M
+    @ARG
+    M = D
+    // LCL = *(frame-4) // restores the caller’s LCL
+    #{target('vm', '0')}
+    AM = M - 1
+    D = M
+    @LCL
+    M = D
+    // goto retAddr // goto returnAddress
+    #{target('vm', '1')}
+    A = M
+    0;JMP
     EOF
   end
 end
