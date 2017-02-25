@@ -86,7 +86,7 @@ class Command
     'local' => 1,
   }
 
-  DIRECT_SEGMENTS = ['vm', 'temp', 'static', 'pointer']
+  DIRECT_SEGMENTS = ['vm', 'temp', 'pointer']
 
   def offset(segment)
     OFFSET[segment]
@@ -105,6 +105,10 @@ class Command
       <<-EOF
         @#{index.to_i + offset(segment)}\t\t// Target #{segment} #{index}
       EOF
+    elsif segment == 'static'
+      <<-EOF
+        @#{$current_file}.#{index}\t// Target #{segment} #{index} #{$current_file}
+      EOF
     else
       out = <<-EOF
         @#{offset(segment)}\t\t// Target #{segment}
@@ -114,6 +118,14 @@ class Command
         out << "A = A + 1\t// So dumb...\n"
       end
       out
+    end
+  end
+
+  def labelizer
+    if $current_function
+      "#{$current_function}$#{@segment}"
+    else
+      @segment
     end
   end
 
@@ -319,7 +331,7 @@ end
 class Label < Command
   def write
     <<-EOF
-      (#{$current_function}$#{@segment})
+      (#{labelizer})
     EOF
   end
 end
@@ -330,7 +342,7 @@ class IfGoto < Command
       #{Pop.new('vm', '0').write}
       #{target('vm', '0')}
       D=M
-      @#{$current_function}$#{@segment}
+      @#{labelizer}
       D;JNE
     EOF
   end
@@ -339,7 +351,7 @@ end
 class Goto < Command
   def write
     <<-EOF
-      @#{$current_function}$#{@segment}
+      @#{labelizer}
       0;JMP
     EOF
   end
@@ -472,34 +484,39 @@ path = Pathname.new(ARGV[0])
 
 if path.file?
   output_file = ARGV[0].sub(/\.vm$/,'.asm')
-  input = ARGF.read
+  files = [ARGV[0]]
 else
   output_file = "#{path}/#{path.basename}.asm"
-  input = path.children.map(&:to_s).grep(/\.vm$/).map do |f|
-    File.read(f)
-  end.join("\n")
+  files = path.children.map(&:to_s).grep(/\.vm$/)
 end
 
-commands = [Bootstrap.new('', '')]
 $label_counter = 0
-$current_function = ''
+$current_function = nil
 
-input.each_line do |line|
-  #puts "Line: #{line}"
+File.open(output_file, 'w') do |fh_out|
+  commands = [Bootstrap.new('', '')]
+  fh_out.puts commands.map(&:cmd_write).join("\n").gsub(/^\s+/m, "")
 
-  if (line.start_with?('//'))
-    next
+  files.each do |file_name|
+    commands = []
+    $current_file = Pathname.new(file_name).basename.to_s
+    fh = File.new(file_name)
+
+    fh.each_line do |line|
+      #puts "Line: #{line}"
+
+      if (line.start_with?('//'))
+        next
+      end
+
+      if (line[/^\s*([-\w]+)\s*([\w\.]*)\s*(\w*)/])
+        cmd = $1
+        arg1 = $2
+        arg2 = $3
+        #puts "Cmd: #{cmd}::#{arg1}::#{arg2}"
+        commands << Command.parse(cmd, arg1, arg2)
+      end
+    end
+    fh_out.puts commands.map(&:cmd_write).join("\n").gsub(/^\s+/m, "")
   end
-
-  if (line[/^\s*([-\w]+)\s*([\w\.]*)\s*(\w*)/])
-    cmd = $1
-    arg1 = $2
-    arg2 = $3
-    #puts "Cmd: #{cmd}::#{arg1}::#{arg2}"
-    commands << Command.parse(cmd, arg1, arg2)
-  end
-end
-
-File.open(output_file, 'w') do |fh|
-  fh.puts commands.map(&:cmd_write).join("\n").gsub(/^\s+/m, "")
 end
