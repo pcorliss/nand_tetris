@@ -1,0 +1,239 @@
+class Main {
+  function void main() {
+    // 32 16-bit segments wide - 512/32
+    // 16 16-bit segments wide - 256/32
+    // 512 segments total
+    var Array a;
+    var int i, adder;
+
+    let a = Array.new(512);
+    let i = 0;
+    while(i < 512){
+      let a[i] = 0;
+      let i = i + 1;
+    }
+
+
+    let a = Main.initPentaDecathalon(a);
+
+    let a[32*6+8] = 1;
+    let a[32*6+9] = 1;
+    let a[32*6+10] = 1;
+
+    let a[32*7+20] = 1;
+    let a[32*6+20] = 1;
+    let a[32*5+20] = 1;
+
+    while (1 = 1) {
+      do Main.printDisplay(a);
+      let a = Main.countNeighbors(a);
+
+      /*let i = Keyboard.keyPressed();*/
+      /*let a[i] = 1;*/
+
+      /*do Sys.wait(1000);*/
+    }
+    return;
+  }
+
+    /*do Main.drawStar(0);*/
+    /*do Main.drawStar(513);*/
+    /*do Main.drawStar(1026);*/
+    // do Main.drawStar(7711);
+
+  function Array countNeighbors(Array a) {
+    var Array n;
+    var int i;
+
+    let n = Array.new(512);
+    let i = 0;
+    while(i < 512){
+      let n[i] = 0;
+      let i = i + 1;
+    }
+
+    let i = 0;
+    while(i < 512){
+      if(a[i] = 1){
+        // If conditionals in place to prevent array overflows
+        if(i > 0  ) {
+          let n[i - 1] = n[i - 1] + 1; // Left
+        }
+        if(i < 511) {
+          let n[i + 1] = n[i + 1] + 1; // Right
+        }
+
+        if(i > 32 ) {
+          let n[i - 33] = n[i - 33] + 1; // Up Left
+        }
+        if(i > 31 ) {
+          let n[i - 32] = n[i - 32] + 1; // Up
+        }
+        if(i > 30 ) {
+          let n[i - 31] = n[i - 31] + 1; // Up Right
+        }
+
+        if(i < 481) {
+          let n[i + 31] = n[i + 31] + 1; // Down Left
+        }
+        if(i < 482) {
+          let n[i + 32] = n[i + 32] + 1; // Down
+        }
+        if(i < 483) {
+          let n[i + 33] = n[i + 33] + 1; // Down Right
+        }
+      }
+      let i = i + 1;
+    }
+
+    let i = 0;
+    while(i < 512){
+      if(a[i] = 1){
+        // Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
+        // Any live cell with more than three live neighbours dies, as if by overpopulation.
+        if(n[i] < 2) {
+          let a[i] = 0;
+        }
+        if(n[i] > 3) {
+          let a[i] = 0;
+        }
+        // Any live cell with two or three live neighbours lives on to the next generation.
+        // no-op
+      } else {
+        // Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+        if(n[i] = 3) {
+          let a[i] = 1;
+        }
+      }
+      let i = i + 1;
+    }
+
+    do n.dispose();
+
+    return a;
+  }
+
+  function Array initPentaDecathalon(Array a){
+    // Penta-Decathalon Init
+    //   X    X
+    // XX XXXX XX
+    //   X    X
+
+    let a[205] = 1;
+    let a[210] = 1;
+
+    let a[235] = 1;
+    let a[236] = 1;
+    let a[238] = 1;
+    let a[239] = 1;
+    let a[240] = 1;
+    let a[241] = 1;
+    let a[243] = 1;
+    let a[244] = 1;
+
+    let a[269] = 1;
+    let a[274] = 1;
+
+    return a;
+  }
+
+  function void printDisplay(Array a){
+    var int i, address;
+    let i = 0;
+    while (i < 512) {
+      let address = Main.getAddress(i);
+      if (a[i] = 1) {
+        do Main.drawStar(address);
+      } else {
+        do Main.drawEmpty(address);
+      }
+      let i = i + 1;
+    }
+    return;
+  }
+
+  function int getAddress(int i) {
+    return Main.remainder(i, 32) + (i / 32 * 512);
+  }
+
+  // do Main.drawStar(0);
+  // do Main.drawDead(960);
+
+  // var int rem;
+  // let rem = Main.remainder(34, 7);
+  // do Output.printInt(rem);
+  // do Output.println();      // New line
+
+  // *
+  function void drawStar(int location) {
+    var int memAddress;
+    let memAddress = 16384+location;
+    do Memory.poke(memAddress+0, 0);
+    do Memory.poke(memAddress+32, 24966);
+    do Memory.poke(memAddress+64, 29070);
+    do Memory.poke(memAddress+96, 14748);
+    do Memory.poke(memAddress+128, 7608);
+    do Memory.poke(memAddress+160, 3696);
+    do Memory.poke(memAddress+192, 1632);
+    do Memory.poke(memAddress+224, 30750);
+    do Memory.poke(memAddress+256, 30750);
+    do Memory.poke(memAddress+288, 1632);
+    do Memory.poke(memAddress+320, 3696);
+    do Memory.poke(memAddress+352, 7608);
+    do Memory.poke(memAddress+384, 14748);
+    do Memory.poke(memAddress+416, 29070);
+    do Memory.poke(memAddress+448, 24966);
+    do Memory.poke(memAddress+480, 0);
+    return;
+  }
+
+  function void drawEmpty(int location) {
+    var int memAddress;
+    let memAddress = 16384+location;
+    do Memory.poke(memAddress+0, 0);
+    do Memory.poke(memAddress+32, 0);
+    do Memory.poke(memAddress+64, 0);
+    do Memory.poke(memAddress+96, 0);
+    do Memory.poke(memAddress+128, 0);
+    do Memory.poke(memAddress+160, 0);
+    do Memory.poke(memAddress+192, 0);
+    do Memory.poke(memAddress+224, 0);
+    do Memory.poke(memAddress+256, 0);
+    do Memory.poke(memAddress+288, 0);
+    do Memory.poke(memAddress+320, 0);
+    do Memory.poke(memAddress+352, 0);
+    do Memory.poke(memAddress+384, 0);
+    do Memory.poke(memAddress+416, 0);
+    do Memory.poke(memAddress+448, 0);
+    do Memory.poke(memAddress+480, 0);
+    return;
+  }
+
+  // X-(
+  function void drawDead(int location) {
+    var int memAddress;
+    let memAddress = 16384+location;
+    do Memory.poke(memAddress+0, 0);
+    do Memory.poke(memAddress+32, -13261);
+    do Memory.poke(memAddress+64, -13261);
+    do Memory.poke(memAddress+96, 12300);
+    do Memory.poke(memAddress+128, 12300);
+    do Memory.poke(memAddress+160, -13261);
+    do Memory.poke(memAddress+192, -13261);
+    do Memory.poke(memAddress+224, 0);
+    do Memory.poke(memAddress+256, 0);
+    do Memory.poke(memAddress+288, 4080);
+    do Memory.poke(memAddress+320, 8184);
+    do Memory.poke(memAddress+352, 14364);
+    do Memory.poke(memAddress+384, 12300);
+    do Memory.poke(memAddress+416, 12300);
+    do Memory.poke(memAddress+448, 12300);
+    do Memory.poke(memAddress+480, 0);
+    return;
+  }
+
+  // modulus or % operator
+  function int remainder(int x, int y) {
+    return (x - ((x/y) * y));
+  }
+}
