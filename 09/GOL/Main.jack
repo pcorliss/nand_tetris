@@ -15,14 +15,10 @@ class Main {
 
 
     let a = Main.initPentaDecathalon(a);
-
-    let a[32*6+8] = 1;
-    let a[32*6+9] = 1;
-    let a[32*6+10] = 1;
-
-    let a[32*7+20] = 1;
-    let a[32*6+20] = 1;
-    let a[32*5+20] = 1;
+    let a = Main.initPulse(a, 33);
+    let a = Main.initPulse(a, 62);
+    let a = Main.initPulse(a, 449);
+    let a = Main.initPulse(a, 478);
 
     while (1 = 1) {
       do Main.printDisplay(a);
@@ -31,7 +27,7 @@ class Main {
       /*let i = Keyboard.keyPressed();*/
       /*let a[i] = 1;*/
 
-      /*do Sys.wait(1000);*/
+      do Sys.wait(250);
     }
     return;
   }
@@ -44,6 +40,7 @@ class Main {
   function Array countNeighbors(Array a) {
     var Array n;
     var int i;
+    var boolean left, right, up, down;
 
     let n = Array.new(512);
     let i = 0;
@@ -56,31 +53,38 @@ class Main {
     while(i < 512){
       if(a[i] = 1){
         // If conditionals in place to prevent array overflows
-        if(i > 0  ) {
+        /*detect if on a border*/
+        let left = (Main.remainder(i, 32) = 0);
+        let right = (Main.remainder(i, 32) = 31);
+        let up = (i < 32);
+        let down = (i > 479);
+
+        // could also apply a matrix/mask here
+
+        if(~ left) {
           let n[i - 1] = n[i - 1] + 1; // Left
+          if(~ up) {
+            let n[i - 33] = n[i - 33] + 1; // Up Left
+          }
+          if(~ down) {
+            let n[i + 31] = n[i + 31] + 1; // Down Left
+          }
         }
-        if(i < 511) {
+        if(~ right) {
           let n[i + 1] = n[i + 1] + 1; // Right
+          if(~ up) {
+            let n[i - 31] = n[i - 31] + 1; // Up Right
+          }
+          if(~ down) {
+            let n[i + 33] = n[i + 33] + 1; // Down Right
+          }
         }
 
-        if(i > 32 ) {
-          let n[i - 33] = n[i - 33] + 1; // Up Left
-        }
-        if(i > 31 ) {
+        if(~ up) {
           let n[i - 32] = n[i - 32] + 1; // Up
         }
-        if(i > 30 ) {
-          let n[i - 31] = n[i - 31] + 1; // Up Right
-        }
-
-        if(i < 481) {
-          let n[i + 31] = n[i + 31] + 1; // Down Left
-        }
-        if(i < 482) {
+        if(~ down) {
           let n[i + 32] = n[i + 32] + 1; // Down
-        }
-        if(i < 483) {
-          let n[i + 33] = n[i + 33] + 1; // Down Right
         }
       }
       let i = i + 1;
@@ -110,6 +114,14 @@ class Main {
 
     do n.dispose();
 
+    return a;
+  }
+
+
+  function Array initPulse(Array a, int origin){
+    let a[origin - 1] = 1;
+    let a[origin] = 1;
+    let a[origin + 1] = 1;
     return a;
   }
 

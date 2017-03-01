@@ -27,78 +27,22 @@ label WHILE_END0
 push local 0
 call Main.initPentaDecathalon 1
 pop local 0
-push constant 32
-push constant 6
-call Math.multiply 2
-push constant 8
-add
 push local 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push constant 32
-push constant 6
-call Math.multiply 2
-push constant 9
-add
+push constant 33
+call Main.initPulse 2
+pop local 0
 push local 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push constant 32
-push constant 6
-call Math.multiply 2
-push constant 10
-add
+push constant 62
+call Main.initPulse 2
+pop local 0
 push local 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push constant 32
-push constant 7
-call Math.multiply 2
-push constant 20
-add
+push constant 449
+call Main.initPulse 2
+pop local 0
 push local 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push constant 32
-push constant 6
-call Math.multiply 2
-push constant 20
-add
-push local 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push constant 32
-push constant 5
-call Math.multiply 2
-push constant 20
-add
-push local 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
+push constant 478
+call Main.initPulse 2
+pop local 0
 label WHILE_EXP1
 push constant 1
 push constant 1
@@ -111,11 +55,24 @@ pop temp 0
 push local 0
 call Main.countNeighbors 1
 pop local 0
+call Keyboard.keyPressed 0
+pop local 1
+push local 1
+push local 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 250
+call Sys.wait 1
+pop temp 0
 goto WHILE_EXP1
 label WHILE_END1
 push constant 0
 return
-function Main.countNeighbors 2
+function Main.countNeighbors 6
 push constant 512
 call Array.new 1
 pop local 0
@@ -160,8 +117,27 @@ if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
 push local 1
+push constant 32
+call Main.remainder 2
 push constant 0
+eq
+pop local 2
+push local 1
+push constant 32
+call Main.remainder 2
+push constant 31
+eq
+pop local 3
+push local 1
+push constant 32
+lt
+pop local 4
+push local 1
+push constant 479
 gt
+pop local 5
+push local 2
+not
 if-goto IF_TRUE1
 goto IF_FALSE1
 label IF_TRUE1
@@ -183,21 +159,19 @@ pop temp 0
 pop pointer 1
 push temp 0
 pop that 0
-label IF_FALSE1
-push local 1
-push constant 511
-lt
+push local 4
+not
 if-goto IF_TRUE2
 goto IF_FALSE2
 label IF_TRUE2
 push local 1
-push constant 1
-add
+push constant 33
+sub
 push local 0
 add
 push local 1
-push constant 1
-add
+push constant 33
+sub
 push local 0
 add
 pop pointer 1
@@ -209,20 +183,19 @@ pop pointer 1
 push temp 0
 pop that 0
 label IF_FALSE2
-push local 1
-push constant 32
-gt
+push local 5
+not
 if-goto IF_TRUE3
 goto IF_FALSE3
 label IF_TRUE3
 push local 1
-push constant 33
-sub
+push constant 31
+add
 push local 0
 add
 push local 1
-push constant 33
-sub
+push constant 31
+add
 push local 0
 add
 pop pointer 1
@@ -234,20 +207,20 @@ pop pointer 1
 push temp 0
 pop that 0
 label IF_FALSE3
-push local 1
-push constant 31
-gt
+label IF_FALSE1
+push local 3
+not
 if-goto IF_TRUE4
 goto IF_FALSE4
 label IF_TRUE4
 push local 1
-push constant 32
-sub
+push constant 1
+add
 push local 0
 add
 push local 1
-push constant 32
-sub
+push constant 1
+add
 push local 0
 add
 pop pointer 1
@@ -258,10 +231,8 @@ pop temp 0
 pop pointer 1
 push temp 0
 pop that 0
-label IF_FALSE4
-push local 1
-push constant 30
-gt
+push local 4
+not
 if-goto IF_TRUE5
 goto IF_FALSE5
 label IF_TRUE5
@@ -284,19 +255,18 @@ pop pointer 1
 push temp 0
 pop that 0
 label IF_FALSE5
-push local 1
-push constant 481
-lt
+push local 5
+not
 if-goto IF_TRUE6
 goto IF_FALSE6
 label IF_TRUE6
 push local 1
-push constant 31
+push constant 33
 add
 push local 0
 add
 push local 1
-push constant 31
+push constant 33
 add
 push local 0
 add
@@ -309,20 +279,20 @@ pop pointer 1
 push temp 0
 pop that 0
 label IF_FALSE6
-push local 1
-push constant 482
-lt
+label IF_FALSE4
+push local 4
+not
 if-goto IF_TRUE7
 goto IF_FALSE7
 label IF_TRUE7
 push local 1
 push constant 32
-add
+sub
 push local 0
 add
 push local 1
 push constant 32
-add
+sub
 push local 0
 add
 pop pointer 1
@@ -334,19 +304,18 @@ pop pointer 1
 push temp 0
 pop that 0
 label IF_FALSE7
-push local 1
-push constant 483
-lt
+push local 5
+not
 if-goto IF_TRUE8
 goto IF_FALSE8
 label IF_TRUE8
 push local 1
-push constant 33
+push constant 32
 add
 push local 0
 add
 push local 1
-push constant 33
+push constant 32
 add
 push local 0
 add
@@ -453,6 +422,37 @@ label WHILE_END2
 push local 0
 call Array.dispose 1
 pop temp 0
+push argument 0
+return
+function Main.initPulse 0
+push argument 1
+push constant 1
+sub
+push argument 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push argument 1
+push argument 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push argument 1
+push constant 1
+add
+push argument 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
 push argument 0
 return
 function Main.initPentaDecathalon 0
