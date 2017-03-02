@@ -25,11 +25,30 @@ push argument 0
 add
 pop pointer 1
 push that 0
-push constant 1
+push constant 2
 eq
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
+push local 0
+push argument 0
+add
+push constant 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_FALSE0
+push local 0
+push argument 0
+add
+pop pointer 1
+push that 0
+push constant 1
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
 push local 0
 push argument 1
 add
@@ -37,18 +56,6 @@ pop pointer 1
 push that 0
 push constant 2
 lt
-if-goto IF_TRUE1
-goto IF_FALSE1
-label IF_TRUE1
-push local 0
-push argument 0
-add
-push constant 0
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-label IF_FALSE1
 push local 0
 push argument 1
 add
@@ -56,20 +63,21 @@ pop pointer 1
 push that 0
 push constant 3
 gt
+or
 if-goto IF_TRUE2
 goto IF_FALSE2
 label IF_TRUE2
 push local 0
 push argument 0
 add
-push constant 0
+push constant 2
 pop temp 0
 pop pointer 1
 push temp 0
 pop that 0
 label IF_FALSE2
-goto IF_END0
-label IF_FALSE0
+goto IF_END1
+label IF_FALSE1
 push local 0
 push argument 1
 add
@@ -89,7 +97,7 @@ pop pointer 1
 push temp 0
 pop that 0
 label IF_FALSE3
-label IF_END0
+label IF_END1
 push local 0
 push constant 1
 add

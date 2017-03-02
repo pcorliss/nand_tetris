@@ -1,15 +1,24 @@
 class Print {
   function void display(Array a){
     var int i, address;
+
+    // Causes some flicker unfortunately
+    do Screen.clearScreen();
+
     let i = 0;
     while (i < 512) {
       let address = Print.getAddress(i);
       if (a[i] = 1) {
         do Print.star(address);
-      } else {
-        // Can we clear the screen instead?
-        do Print.empty(address);
       }
+      // Dead cells don't look as pretty as live ones
+      // if (a[i] = 2) {
+      //   do Print.dead(address);
+      // }
+      // if (a[i] = 0) {
+      //   It's faster to clear the screen than to zero out memory
+      //   do Print.empty(address);
+      // }
       let i = i + 1;
     }
     return;

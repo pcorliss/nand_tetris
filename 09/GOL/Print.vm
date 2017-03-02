@@ -1,4 +1,6 @@
 function Print.display 2
+call Screen.clearScreen 0
+pop temp 0
 push constant 0
 pop local 0
 label WHILE_EXP0
@@ -23,12 +25,7 @@ label IF_TRUE0
 push local 1
 call Print.star 1
 pop temp 0
-goto IF_END0
 label IF_FALSE0
-push local 1
-call Print.empty 1
-pop temp 0
-label IF_END0
 push local 0
 push constant 1
 add

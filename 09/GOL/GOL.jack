@@ -16,15 +16,15 @@ class GOL {
 
     let i = 0;
     while(i < 512){
+      // Cell died in previous frame, clearing
+      if(a[i] = 2){
+        let a[i] = 0;
+      }
       if(a[i] = 1){
         // Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
-        if(n[i] < 2) {
-          let a[i] = 0;
-        }
-
         // Any live cell with more than three live neighbours dies, as if by overpopulation.
-        if(n[i] > 3) {
-          let a[i] = 0;
+        if((n[i] < 2) | (n[i] > 3)) {
+          let a[i] = 2;
         }
 
         // Any live cell with two or three live neighbours lives on to the next generation.
