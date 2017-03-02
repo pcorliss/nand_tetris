@@ -6,30 +6,67 @@ push local 0
 push constant 512
 call Util.initArray 2
 pop temp 0
-push local 0
-call Shape.pentaDecathalon 1
-pop temp 0
-push local 0
-push constant 33
-call Shape.pulse 2
-pop temp 0
-push local 0
-push constant 62
-call Shape.pulse 2
-pop temp 0
-push local 0
-push constant 449
-call Shape.pulse 2
-pop temp 0
-push local 0
-push constant 478
-call Shape.pulse 2
-pop temp 0
+push constant 0
+pop local 2
 label WHILE_EXP0
 push constant 0
 not
 not
 if-goto WHILE_END0
+call Keyboard.keyPressed 0
+pop local 1
+push local 1
+push constant 0
+gt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push local 2
+push constant 0
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push local 0
+push local 1
+push constant 3
+call Math.multiply 2
+call Shape.pulse 2
+pop temp 0
+label IF_FALSE1
+push local 2
+push constant 1
+eq
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push local 0
+push local 1
+push constant 3
+call Math.multiply 2
+call Shape.beacon 2
+pop temp 0
+label IF_FALSE2
+push local 2
+push constant 2
+eq
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push local 0
+push local 1
+push constant 3
+call Math.multiply 2
+call Shape.glider 2
+pop temp 0
+label IF_FALSE3
+push local 2
+push constant 1
+add
+push constant 3
+call Util.remainder 2
+pop local 2
+label IF_FALSE0
 push local 0
 call Print.display 1
 pop temp 0

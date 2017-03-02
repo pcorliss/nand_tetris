@@ -1,4 +1,5 @@
 class Shape {
+  // XXX -> rotates 90 degrees
   function void pulse(Array a, int origin){
     let a[origin - 1] = 1;
     let a[origin] = 1;
@@ -6,12 +7,40 @@ class Shape {
     return;
   }
 
+  //  X
+  //   X
+  // XXX Glides towards the bottom right
+  function void glider(Array a, int origin){
+    let a[origin+31] = 1;
+    let a[origin+32] = 1;
+    let a[origin+33] = 1;
+    let a[origin+1] = 1;
+    let a[origin-32] = 1;
+    return;
+  }
+
+  // XX
+  // XX
+  //   XX
+  //   XX stable but pulses
+  function void beacon(Array a, int origin){
+    let a[origin-65] = 1;
+    let a[origin-64] = 1;
+    let a[origin-33] = 1;
+    let a[origin-32] = 1;
+    let a[origin+1] = 1;
+    let a[origin+2] = 1;
+    let a[origin+33] = 1;
+    let a[origin+34] = 1;
+    return;
+  }
+
+  // Penta-Decathalon Init
+  // looping GOL segment
+  //   X    X
+  // XX XXXX XX
+  //   X    X
   function void pentaDecathalon(Array a){
-    // Penta-Decathalon Init
-    // looping GOL segment
-    //   X    X
-    // XX XXXX XX
-    //   X    X
 
     let a[205] = 1;
     let a[210] = 1;

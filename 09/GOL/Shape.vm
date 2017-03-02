@@ -29,6 +29,142 @@ push temp 0
 pop that 0
 push constant 0
 return
+function Shape.glider 0
+push argument 1
+push constant 31
+add
+push argument 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push argument 1
+push constant 32
+add
+push argument 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push argument 1
+push constant 33
+add
+push argument 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push argument 1
+push constant 1
+add
+push argument 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push argument 1
+push constant 32
+sub
+push argument 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 0
+return
+function Shape.beacon 0
+push argument 1
+push constant 65
+sub
+push argument 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push argument 1
+push constant 64
+sub
+push argument 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push argument 1
+push constant 33
+sub
+push argument 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push argument 1
+push constant 32
+sub
+push argument 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push argument 1
+push constant 1
+add
+push argument 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push argument 1
+push constant 2
+add
+push argument 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push argument 1
+push constant 33
+add
+push argument 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push argument 1
+push constant 34
+add
+push argument 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 0
+return
 function Shape.pentaDecathalon 0
 push constant 205
 push argument 0
