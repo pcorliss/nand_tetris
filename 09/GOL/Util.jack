@@ -4,6 +4,7 @@ class Util {
     return (x - ((x/y) * y));
   }
 
+  // We can't guarantee that memory will be init with 0
   function void initArray(Array a, int length) {
     var int i;
     let i = 0;

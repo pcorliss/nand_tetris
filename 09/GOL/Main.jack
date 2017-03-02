@@ -17,90 +17,12 @@ class Main {
 
     while(true) {
       do Print.display(a);
-      do Main.countNeighbors(a);
+      do GOL.tick(a);
+      do Sys.wait(250);
 
       /*let i = Keyboard.keyPressed();*/
       /*let a[i] = 1;*/
-
-      do Sys.wait(250);
     }
     return;
   }
-
-  function void countNeighbors(Array a) {
-    var Array n;
-    var int i;
-    var boolean left, right, up, down;
-
-    let n = Array.new(512);
-    do Util.initArray(n, 512);
-
-    let i = 0;
-    while(i < 512){
-      if(a[i] = 1){
-        // If conditionals in place to prevent array overflows
-        /*detect if on a border*/
-        let left = (Util.remainder(i, 32) = 0);
-        let right = (Util.remainder(i, 32) = 31);
-        let up = (i < 32);
-        let down = (i > 479);
-
-        // could also apply a matrix/mask here
-
-        if(~ left) {
-          let n[i - 1] = n[i - 1] + 1; // Left
-          if(~ up) {
-            let n[i - 33] = n[i - 33] + 1; // Up Left
-          }
-          if(~ down) {
-            let n[i + 31] = n[i + 31] + 1; // Down Left
-          }
-        }
-        if(~ right) {
-          let n[i + 1] = n[i + 1] + 1; // Right
-          if(~ up) {
-            let n[i - 31] = n[i - 31] + 1; // Up Right
-          }
-          if(~ down) {
-            let n[i + 33] = n[i + 33] + 1; // Down Right
-          }
-        }
-
-        if(~ up) {
-          let n[i - 32] = n[i - 32] + 1; // Up
-        }
-        if(~ down) {
-          let n[i + 32] = n[i + 32] + 1; // Down
-        }
-      }
-      let i = i + 1;
-    }
-
-    let i = 0;
-    while(i < 512){
-      if(a[i] = 1){
-        // Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
-        // Any live cell with more than three live neighbours dies, as if by overpopulation.
-        if(n[i] < 2) {
-          let a[i] = 0;
-        }
-        if(n[i] > 3) {
-          let a[i] = 0;
-        }
-        // Any live cell with two or three live neighbours lives on to the next generation.
-        // no-op
-      } else {
-        // Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
-        if(n[i] = 3) {
-          let a[i] = 1;
-        }
-      }
-      let i = i + 1;
-    }
-
-    do n.dispose();
-
-    return;
-  }
-
 }

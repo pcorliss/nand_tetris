@@ -1,0 +1,284 @@
+function GOL.tick 2
+push argument 0
+call GOL.countNeighbors 1
+pop local 0
+push argument 0
+push local 0
+call GOL.applyRules 2
+pop temp 0
+push local 0
+call Array.dispose 1
+pop temp 0
+push constant 0
+return
+function GOL.applyRules 1
+push constant 0
+pop local 0
+label WHILE_EXP0
+push local 0
+push constant 512
+lt
+not
+if-goto WHILE_END0
+push local 0
+push argument 0
+add
+pop pointer 1
+push that 0
+push constant 1
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push local 0
+push argument 1
+add
+pop pointer 1
+push that 0
+push constant 2
+lt
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push local 0
+push argument 0
+add
+push constant 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_FALSE1
+push local 0
+push argument 1
+add
+pop pointer 1
+push that 0
+push constant 3
+gt
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push local 0
+push argument 0
+add
+push constant 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_FALSE2
+goto IF_END0
+label IF_FALSE0
+push local 0
+push argument 1
+add
+pop pointer 1
+push that 0
+push constant 3
+eq
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push local 0
+push argument 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_FALSE3
+label IF_END0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push constant 0
+return
+function GOL.countNeighbors 6
+push constant 512
+call Array.new 1
+pop local 0
+push local 0
+push constant 512
+call Util.initArray 2
+pop temp 0
+push constant 0
+pop local 5
+label WHILE_EXP0
+push local 5
+push constant 512
+lt
+not
+if-goto WHILE_END0
+push local 5
+push argument 0
+add
+pop pointer 1
+push that 0
+push constant 1
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push local 5
+call GOL.onLeft 1
+pop local 1
+push local 5
+call GOL.onRight 1
+pop local 2
+push local 5
+call GOL.onTop 1
+pop local 3
+push local 5
+call GOL.onBottom 1
+pop local 4
+push local 1
+not
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push local 0
+push local 5
+push constant 1
+sub
+call GOL.incr 2
+pop temp 0
+push local 3
+not
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push local 0
+push local 5
+push constant 33
+sub
+call GOL.incr 2
+pop temp 0
+label IF_FALSE2
+push local 4
+not
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push local 0
+push local 5
+push constant 31
+add
+call GOL.incr 2
+pop temp 0
+label IF_FALSE3
+label IF_FALSE1
+push local 2
+not
+if-goto IF_TRUE4
+goto IF_FALSE4
+label IF_TRUE4
+push local 0
+push local 5
+push constant 1
+add
+call GOL.incr 2
+pop temp 0
+push local 3
+not
+if-goto IF_TRUE5
+goto IF_FALSE5
+label IF_TRUE5
+push local 0
+push local 5
+push constant 31
+sub
+call GOL.incr 2
+pop temp 0
+label IF_FALSE5
+push local 4
+not
+if-goto IF_TRUE6
+goto IF_FALSE6
+label IF_TRUE6
+push local 0
+push local 5
+push constant 33
+add
+call GOL.incr 2
+pop temp 0
+label IF_FALSE6
+label IF_FALSE4
+push local 3
+not
+if-goto IF_TRUE7
+goto IF_FALSE7
+label IF_TRUE7
+push local 0
+push local 5
+push constant 32
+sub
+call GOL.incr 2
+pop temp 0
+label IF_FALSE7
+push local 4
+not
+if-goto IF_TRUE8
+goto IF_FALSE8
+label IF_TRUE8
+push local 0
+push local 5
+push constant 32
+add
+call GOL.incr 2
+pop temp 0
+label IF_FALSE8
+label IF_FALSE0
+push local 5
+push constant 1
+add
+pop local 5
+goto WHILE_EXP0
+label WHILE_END0
+push local 0
+return
+function GOL.incr 0
+push argument 1
+push argument 0
+add
+push argument 1
+push argument 0
+add
+pop pointer 1
+push that 0
+push constant 1
+add
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 0
+return
+function GOL.onLeft 0
+push argument 0
+push constant 32
+call Util.remainder 2
+push constant 0
+eq
+return
+function GOL.onRight 0
+push argument 0
+push constant 32
+call Util.remainder 2
+push constant 31
+eq
+return
+function GOL.onTop 0
+push argument 0
+push constant 32
+lt
+return
+function GOL.onBottom 0
+push argument 0
+push constant 479
+gt
+return

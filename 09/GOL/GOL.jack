@@ -1,0 +1,114 @@
+class GOL {
+  function void tick(Array a) {
+    var Array n;
+    var int i;
+
+    let n = GOL.countNeighbors(a);
+    do GOL.applyRules(a, n);
+
+    do n.dispose();
+
+    return;
+  }
+
+  function void applyRules(Array a, Array n){
+    var int i;
+
+    let i = 0;
+    while(i < 512){
+      if(a[i] = 1){
+        // Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
+        if(n[i] < 2) {
+          let a[i] = 0;
+        }
+
+        // Any live cell with more than three live neighbours dies, as if by overpopulation.
+        if(n[i] > 3) {
+          let a[i] = 0;
+        }
+
+        // Any live cell with two or three live neighbours lives on to the next generation.
+        // no-op
+      } else {
+        // Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+        if(n[i] = 3) {
+          let a[i] = 1;
+        }
+      }
+      let i = i + 1;
+    }
+
+    return;
+  }
+
+  function Array countNeighbors(Array a){
+    var Array n;
+    var boolean left, right, up, down;
+    var int i;
+
+    let n = Array.new(512);
+    do Util.initArray(n, 512);
+
+    let i = 0;
+    while(i < 512){
+      if(a[i] = 1){
+        // Need to detect elements on screen borders
+        // And not increase neighbor count
+        let left = GOL.onLeft(i);
+        let right = GOL.onRight(i);
+        let up = GOL.onTop(i);
+        let down = GOL.onBottom(i);
+
+        if(~ left) {
+          do GOL.incr(n, i - 1); // Left
+          if(~ up) {
+            do GOL.incr(n, i - 33); // Up Left
+          }
+          if(~ down) {
+            do GOL.incr(n, i + 31); // Down Left
+          }
+        }
+        if(~ right) {
+          do GOL.incr(n, i + 1); // Right
+          if(~ up) {
+            do GOL.incr(n, i - 31); // Up Right
+          }
+          if(~ down) {
+            do GOL.incr(n, i + 33); // Down Right
+          }
+        }
+
+        if(~ up) {
+          do GOL.incr(n, i - 32); // Up
+        }
+        if(~ down) {
+          do GOL.incr(n, i + 32); // Down
+        }
+      }
+      let i = i + 1;
+    }
+
+    return n;
+  }
+
+  function void incr(Array n, int i){
+    let n[i] = n[i] + 1;
+    return;
+  }
+
+  function boolean onLeft(int i){
+    return (Util.remainder(i, 32) = 0);
+  }
+
+  function boolean onRight(int i){
+    return (Util.remainder(i, 32) = 31);
+  }
+
+  function boolean onTop(int i){
+    return (i < 32);
+  }
+
+  function boolean onBottom(int i){
+    return (i > 479); // 512 - 32 == 480
+  }
+}
