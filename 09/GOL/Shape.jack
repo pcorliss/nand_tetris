@@ -1,0 +1,33 @@
+class Shape {
+  function void pulse(Array a, int origin){
+    let a[origin - 1] = 1;
+    let a[origin] = 1;
+    let a[origin + 1] = 1;
+    return;
+  }
+
+  function void pentaDecathalon(Array a){
+    // Penta-Decathalon Init
+    // looping GOL segment
+    //   X    X
+    // XX XXXX XX
+    //   X    X
+
+    let a[205] = 1;
+    let a[210] = 1;
+
+    let a[235] = 1;
+    let a[236] = 1;
+    let a[238] = 1;
+    let a[239] = 1;
+    let a[240] = 1;
+    let a[241] = 1;
+    let a[243] = 1;
+    let a[244] = 1;
+
+    let a[269] = 1;
+    let a[274] = 1;
+
+    return;
+  }
+}

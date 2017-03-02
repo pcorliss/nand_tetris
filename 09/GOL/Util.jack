@@ -1,0 +1,16 @@
+class Util {
+  // modulus or % operator
+  function int remainder(int x, int y) {
+    return (x - ((x/y) * y));
+  }
+
+  function void initArray(Array a, int length) {
+    var int i;
+    let i = 0;
+    while(i < length) {
+      let a[i] = 0;
+      let i = i + 1;
+    }
+    return;
+  }
+}

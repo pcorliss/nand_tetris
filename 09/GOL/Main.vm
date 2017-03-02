@@ -2,80 +2,55 @@ function Main.main 3
 push constant 512
 call Array.new 1
 pop local 0
-push constant 0
-pop local 1
-label WHILE_EXP0
-push local 1
+push local 0
 push constant 512
-lt
-not
-if-goto WHILE_END0
-push local 1
-push local 0
-add
-push constant 0
+call Util.initArray 2
 pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push local 1
-push constant 1
-add
-pop local 1
-goto WHILE_EXP0
-label WHILE_END0
 push local 0
-call Main.initPentaDecathalon 1
-pop local 0
+call Shape.pentaDecathalon 1
+pop temp 0
 push local 0
 push constant 33
-call Main.initPulse 2
-pop local 0
+call Shape.pulse 2
+pop temp 0
 push local 0
 push constant 62
-call Main.initPulse 2
-pop local 0
+call Shape.pulse 2
+pop temp 0
 push local 0
 push constant 449
-call Main.initPulse 2
-pop local 0
+call Shape.pulse 2
+pop temp 0
 push local 0
 push constant 478
-call Main.initPulse 2
-pop local 0
-label WHILE_EXP1
-push constant 1
-push constant 1
-eq
+call Shape.pulse 2
+pop temp 0
+label WHILE_EXP0
+push constant 0
 not
-if-goto WHILE_END1
+not
+if-goto WHILE_END0
 push local 0
-call Main.printDisplay 1
+call Print.display 1
 pop temp 0
 push local 0
 call Main.countNeighbors 1
-pop local 0
-call Keyboard.keyPressed 0
-pop local 1
-push local 1
-push local 0
-add
-push constant 1
 pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
 push constant 250
 call Sys.wait 1
 pop temp 0
-goto WHILE_EXP1
-label WHILE_END1
+goto WHILE_EXP0
+label WHILE_END0
 push constant 0
 return
 function Main.countNeighbors 6
 push constant 512
 call Array.new 1
 pop local 0
+push local 0
+push constant 512
+call Util.initArray 2
+pop temp 0
 push constant 0
 pop local 1
 label WHILE_EXP0
@@ -84,28 +59,6 @@ push constant 512
 lt
 not
 if-goto WHILE_END0
-push local 1
-push local 0
-add
-push constant 0
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push local 1
-push constant 1
-add
-pop local 1
-goto WHILE_EXP0
-label WHILE_END0
-push constant 0
-pop local 1
-label WHILE_EXP1
-push local 1
-push constant 512
-lt
-not
-if-goto WHILE_END1
 push local 1
 push argument 0
 add
@@ -118,13 +71,13 @@ goto IF_FALSE0
 label IF_TRUE0
 push local 1
 push constant 32
-call Main.remainder 2
+call Util.remainder 2
 push constant 0
 eq
 pop local 2
 push local 1
 push constant 32
-call Main.remainder 2
+call Util.remainder 2
 push constant 31
 eq
 pop local 3
@@ -333,16 +286,16 @@ push local 1
 push constant 1
 add
 pop local 1
-goto WHILE_EXP1
-label WHILE_END1
+goto WHILE_EXP0
+label WHILE_END0
 push constant 0
 pop local 1
-label WHILE_EXP2
+label WHILE_EXP1
 push local 1
 push constant 512
 lt
 not
-if-goto WHILE_END2
+if-goto WHILE_END1
 push local 1
 push argument 0
 add
@@ -417,512 +370,10 @@ push local 1
 push constant 1
 add
 pop local 1
-goto WHILE_EXP2
-label WHILE_END2
+goto WHILE_EXP1
+label WHILE_END1
 push local 0
 call Array.dispose 1
 pop temp 0
-push argument 0
-return
-function Main.initPulse 0
-push argument 1
-push constant 1
-sub
-push argument 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push argument 1
-push argument 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push argument 1
-push constant 1
-add
-push argument 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push argument 0
-return
-function Main.initPentaDecathalon 0
-push constant 205
-push argument 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push constant 210
-push argument 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push constant 235
-push argument 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push constant 236
-push argument 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push constant 238
-push argument 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push constant 239
-push argument 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push constant 240
-push argument 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push constant 241
-push argument 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push constant 243
-push argument 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push constant 244
-push argument 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push constant 269
-push argument 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push constant 274
-push argument 0
-add
-push constant 1
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push argument 0
-return
-function Main.printDisplay 2
 push constant 0
-pop local 0
-label WHILE_EXP0
-push local 0
-push constant 512
-lt
-not
-if-goto WHILE_END0
-push local 0
-call Main.getAddress 1
-pop local 1
-push local 0
-push argument 0
-add
-pop pointer 1
-push that 0
-push constant 1
-eq
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
-push local 1
-call Main.drawStar 1
-pop temp 0
-goto IF_END0
-label IF_FALSE0
-push local 1
-call Main.drawEmpty 1
-pop temp 0
-label IF_END0
-push local 0
-push constant 1
-add
-pop local 0
-goto WHILE_EXP0
-label WHILE_END0
-push constant 0
-return
-function Main.getAddress 0
-push argument 0
-push constant 32
-call Main.remainder 2
-push argument 0
-push constant 32
-call Math.divide 2
-push constant 512
-call Math.multiply 2
-add
-return
-function Main.drawStar 1
-push constant 16384
-push argument 0
-add
-pop local 0
-push local 0
-push constant 0
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 32
-add
-push constant 24966
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 64
-add
-push constant 29070
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 96
-add
-push constant 14748
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 128
-add
-push constant 7608
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 160
-add
-push constant 3696
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 192
-add
-push constant 1632
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 224
-add
-push constant 30750
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 256
-add
-push constant 30750
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 288
-add
-push constant 1632
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 320
-add
-push constant 3696
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 352
-add
-push constant 7608
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 384
-add
-push constant 14748
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 416
-add
-push constant 29070
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 448
-add
-push constant 24966
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 480
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push constant 0
-return
-function Main.drawEmpty 1
-push constant 16384
-push argument 0
-add
-pop local 0
-push local 0
-push constant 0
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 32
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 64
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 96
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 128
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 160
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 192
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 224
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 256
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 288
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 320
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 352
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 384
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 416
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 448
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 480
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push constant 0
-return
-function Main.drawDead 1
-push constant 16384
-push argument 0
-add
-pop local 0
-push local 0
-push constant 0
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 32
-add
-push constant 13261
-neg
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 64
-add
-push constant 13261
-neg
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 96
-add
-push constant 12300
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 128
-add
-push constant 12300
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 160
-add
-push constant 13261
-neg
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 192
-add
-push constant 13261
-neg
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 224
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 256
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 288
-add
-push constant 4080
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 320
-add
-push constant 8184
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 352
-add
-push constant 14364
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 384
-add
-push constant 12300
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 416
-add
-push constant 12300
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 448
-add
-push constant 12300
-call Memory.poke 2
-pop temp 0
-push local 0
-push constant 480
-add
-push constant 0
-call Memory.poke 2
-pop temp 0
-push constant 0
-return
-function Main.remainder 0
-push argument 0
-push argument 0
-push argument 1
-call Math.divide 2
-push argument 1
-call Math.multiply 2
-sub
 return
