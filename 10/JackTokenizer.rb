@@ -25,6 +25,10 @@ File.open(output_file, 'w') do |fh_out|
     t.to_xml(doc)
   end
 
-  doc.write(fh_out, 1)
+  #doc.write(fh_out, -1)
+  s = StringIO.new
+  doc.write( s, -1)
+  s.rewind
+  #puts s.read
+  fh_out.write s.read.gsub(/></,">\n<")
 end
-

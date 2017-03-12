@@ -59,8 +59,8 @@ describe Tokenizer do
       expect(t.str).to_not include('This')
       expect(t.str).to_not include('More')
       expect(t.str).to_not include('Stuff')
-      expect(t.str).to_not include('*/')
-      expect(t.str).to_not include('/*')
+      expect(t.str).to_not include('/')
+      expect(t.str).to_not include('*')
     end
 
     it "handles quoted comment identifiers" do

@@ -27,10 +27,13 @@ class Tokenizer
     new_str = ''
     str.each_char do |char|
       last_two = last_char + char
+      #puts "Char: #{char}:#{last_two}"
       if comment
+        #puts "\tComment!"
         if last_two == '*/' && multiline_comment
           comment = false
           multiline_comment = false
+          char = ''
         end
         if char == "\n" && !multiline_comment
           comment = false
@@ -47,7 +50,9 @@ class Tokenizer
         new_str << last_char
       end
       last_char = char
+      #puts "Str: #{new_str}"
     end
+
     if !comment
       new_str << last_char
     end
