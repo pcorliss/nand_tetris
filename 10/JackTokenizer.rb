@@ -7,10 +7,10 @@ require_relative 'lib/tokenizer'
 path = Pathname.new(ARGV[0])
 
 if path.file?
- output_file = ARGV[0].sub(/\.jack$/,'.xml')
+ output_file = ARGV[0].sub(/\.jack$/,'-tokenized.xml')
  files = [ARGV[0]]
 else
- output_file = "#{path}/#{path.basename}.xml"
+ output_file = "#{path}/#{path.basename}-tokenized.xml"
  files = path.children.map(&:to_s).grep(/\.jack$/)
 end
 

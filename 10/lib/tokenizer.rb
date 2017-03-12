@@ -7,7 +7,7 @@ KEYWORDS = %w(
   class constructor function method field static var int
   char boolean void true false null this let do if else while return
 )
-SYMBOLS = %w( { } \( \) [ ] .  , ; + - * / & | < > = )
+SYMBOLS = %w( { } \( \) [ ] .  , ; + - * / & | < > = ~ )
 
 STRING_REGEX = /^"([^"\n]*)"$/ # Need to be careful about greediness
 INTEGER_REGEX = /^\d+$/ # Doesn't restrict to 0 .. 32767

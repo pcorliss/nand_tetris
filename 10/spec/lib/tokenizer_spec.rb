@@ -107,6 +107,16 @@ describe Tokenizer do
         expected = %w(let length = Keyboard . readInt \() + ['"NUMBER\'S? "'] + %w(\) ;)
         expect(tokens).to eq(expected)
       end
+
+      # Was not originally in symbol list
+      it "handles negation" do
+        input = 'while (~exit) {'
+        s = StringIO.new(input)
+        t = Tokenizer.new(s)
+        tokens = t.tokens
+        expected = %w(while \( ~ exit \) { )
+        expect(tokens).to eq(expected)
+      end
     end
   end
 
