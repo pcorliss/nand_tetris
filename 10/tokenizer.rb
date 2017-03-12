@@ -47,8 +47,8 @@ _
 )
 
 STRING_REGEX = /^"([^"\n]*)"$/ # Need to be careful about greediness
-INTEGER_REGEX = /^\d+$/ # Doesn't restrict to 0 .. 32767
-INTEGER_RANGE = (1..32767) # What about zero and negatives?
+INTEGER_REGEX = /^[\-]{0,1}\d+$/ # Doesn't restrict to 0 .. 32767
+INTEGER_RANGE = (-32767..32767) # What about zero and negatives?
 IDENTIFIER_REGEX = /^[a-zA-Z_][\w]*$/
 
 require 'pathname'
