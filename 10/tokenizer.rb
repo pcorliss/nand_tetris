@@ -43,7 +43,6 @@ SYMBOLS = %w(
 <
 >
 =
-_
 )
 
 STRING_REGEX = /^"([^"\n]*)"$/ # Need to be careful about greediness
@@ -177,7 +176,7 @@ class Tokenizer
       elsif last_two == '/*' && !quote
         multiline_comment = true
         comment = true
-      elsif !comment && (char == '"' || char == "'")
+      elsif !comment && char == '"'
         quote = !quote
         new_str << last_char
       else
@@ -202,19 +201,18 @@ class Tokenizer
     return @tokens if @tokens
     token = ''
     quote = false
-    quote_char = ''
     @tokens = []
     str.each_char do |char|
       if !quote && char.match(/\s/)
         @tokens << token if !token.empty?
         token = ''
-      elsif !quote && (char == '"' || char == "'")
+      elsif !quote && char == '"'
+        token << char
         quote = !quote
-        quote_char = char
-      elsif quote && char == quote_char
+      elsif quote && char == '"'
+        token << char
         @tokens << token
         token = ''
-        quote_char = ''
         quote = !quote
       elsif !quote && SYMBOLS.include?(char)
         @tokens << token if !token.empty?
@@ -234,6 +232,12 @@ class Tokenizer
         ['symbol', token]
       elsif KEYWORDS.include? token
         ['keyword', token]
+      elsif token.match(IDENTIFIER_REGEX)
+        ['identifier', token]
+      elsif token.match(INTEGER_REGEX) && INTEGER_RANGE.include?(token.to_i)
+        ['integerConstant', token]
+      elsif match = token.match(STRING_REGEX)
+        ['stringConstant', match[1]]
       end
     end
   end
@@ -317,17 +321,16 @@ describe Tokenizer do
         s = StringIO.new(input)
         t = Tokenizer.new(s)
         tokens = t.tokens
-        expected = %w(let length = Keyboard . readInt \() + ['NUMBER\'S? '] + %w(\) ;)
+        expected = %w(let length = Keyboard . readInt \() + ['"NUMBER\'S? "'] + %w(\) ;)
         expect(tokens).to eq(expected)
       end
     end
   end
 
-  describe "#token_type" do
+  describe "#types" do
     KEYWORDS.each do |key|
       it "handles '#{key}' keyword" do
-        input = key
-        s = StringIO.new(input)
+        s = StringIO.new(key)
         t = Tokenizer.new(s)
         expect(t.types.first).to eq(['keyword', key])
       end
@@ -335,10 +338,52 @@ describe Tokenizer do
 
     SYMBOLS.each do |sym|
       it "handles '#{sym}' symbol" do
-        input = sym
-        s = StringIO.new(input)
+        s = StringIO.new(sym)
         t = Tokenizer.new(s)
         expect(t.types.first).to eq(['symbol', sym])
+      end
+    end
+
+    %w(
+      Foo
+      bar
+      bar_foo
+      foo2bar
+      bar2
+      _foo
+      reallylongstring
+      re3333jjj55_3343kjj3
+    ).each do |ident|
+      it "handles valid identifiers '#{ident}'" do
+        s = StringIO.new(ident)
+        t = Tokenizer.new(s)
+        expect(t.types.first).to eq(['identifier', ident])
+      end
+    end
+
+    %w(
+      0
+      11
+      222
+      3333
+      32767
+    ).each do |ident|
+      it "handles valid integer constant '#{ident}'" do
+        s = StringIO.new(ident)
+        t = Tokenizer.new(s)
+        expect(t.types.first).to eq(['integerConstant', ident])
+      end
+    end
+
+    {
+      '" I am an awesome string "' => ' I am an awesome string ',
+      '")"' => ')',
+      '"while"' => 'while',
+    }.each do |ident, expected|
+      it "handles valid stringConstants: #{ident} and strips quotes" do
+        s = StringIO.new(ident)
+        t = Tokenizer.new(s)
+        expect(t.types.first).to eq(['stringConstant', expected])
       end
     end
   end
