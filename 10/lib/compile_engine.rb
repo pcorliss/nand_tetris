@@ -28,6 +28,7 @@ KEYWORD_LOOKUP = {
 }
 
 CLOSING_SYMBOLS = ['}']
+TERM_CLOSURES = [';', ']']
 
 class CompileEngine
   attr_reader :doc
@@ -198,7 +199,42 @@ class CompileEngine
   # let x = y;
   # let y = square.dispose();;
   def compile_let
+    create_statement
+    @stack << top.add_element('letStatement')
+    last_token = nil
+    i = 0
+    while(last_token != ';')
+      if(last_token == '=')
+        i = compile_expression(i,';')
+      end
+      if(last_token == '[')
+        i = compile_expression(i,']')
+      end
+      type, token = get_token(i)
+      top.add_element(type).text = token
+      i += 1
+      last_token = token
+    end
+    @token_idx += i - 1
+    @stack.pop
+  end
 
+  def compile_expression(idx,stop_token)
+    i = idx
+    @stack << top.add_element('expression')
+    while(get_token(i).last != stop_token)
+      type, token = get_token(i)
+      if(type == 'symbol')
+        top.add_element(type).text = token
+      else
+        @stack << top.add_element('term')
+        top.add_element(type).text = token
+        @stack.pop
+      end
+      i += 1
+    end
+    @stack.pop
+    i
   end
 
   def compile_while
@@ -221,10 +257,6 @@ class CompileEngine
   end
 
   def compile_if
-
-  end
-
-  def compile_expression
 
   end
 end

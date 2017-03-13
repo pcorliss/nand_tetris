@@ -128,7 +128,7 @@ describe CompileEngine do
       eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
       eng.process!
 
-      puts doc.to_s.gsub(/></,">\n<")
+      #puts doc.to_s.gsub(/></,">\n<")
       statements = doc.elements.to_a( "//statements" )
       expect(statements.count).to eq(1)
       do_expr = statements.first.children.first
@@ -138,6 +138,76 @@ describe CompileEngine do
       expect(expr_list.count).to eq(1)
       exprs = expr_list.first.elements.to_a('expression')
       expect(exprs.count).to eq(2)
+    end
+
+    it "handles lets" do
+      input = <<-EOF
+        class Foo {
+          function void bar() {
+            let a = b;
+          }
+        }
+      EOF
+
+      eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
+      eng.process!
+
+      #puts doc.to_s.gsub(/></,">\n<")
+      statements = doc.elements.to_a( "//statements" )
+      expect(statements.count).to eq(1)
+      let_expr = statements.first.children.first
+      expect(let_expr.name).to eq('letStatement')
+      expect(let_expr.children.map(&:text).compact).to eq(['let','a','=',';'])
+      exprs = let_expr.elements.to_a('expression')
+      expect(exprs.count).to eq(1)
+    end
+
+    it "handles lets with simple array assignment" do
+      input = <<-EOF
+        class Foo {
+          function void bar() {
+            let a[i] = j;
+          }
+        }
+      EOF
+
+      eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
+      eng.process!
+
+      #puts doc.to_s.gsub(/></,">\n<")
+      statements = doc.elements.to_a( "//statements" )
+      expect(statements.count).to eq(1)
+      let_expr = statements.first.children.first
+      expect(let_expr.name).to eq('letStatement')
+      expect(let_expr.children.map(&:text).compact).to eq(['let','a','[',']','=',';'])
+      exprs = let_expr.elements.to_a('expression')
+      expect(exprs.count).to eq(2)
+    end
+
+    it "handles lets with more complex post = terms" do
+      input = <<-EOF
+        class Foo {
+          function void bar() {
+            let a = j | b;
+          }
+        }
+      EOF
+
+      eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
+      eng.process!
+
+      #puts doc.to_s.gsub(/></,">\n<")
+      statements = doc.elements.to_a( "//statements" )
+      expect(statements.count).to eq(1)
+      let_expr = statements.first.children.first
+      expect(let_expr.name).to eq('letStatement')
+      expect(let_expr.children.map(&:text).compact).to eq(['let','a','=',';'])
+      exprs = let_expr.elements.to_a('expression')
+      expect(exprs.count).to eq(1)
+      terms = exprs.first.elements.to_a('term')
+      expect(terms.count).to eq(2)
+      syms = exprs.first.elements.to_a('symbol')
+      expect(syms.count).to eq(1)
     end
   end
 end
