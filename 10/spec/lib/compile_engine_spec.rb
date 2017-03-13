@@ -210,4 +210,69 @@ describe CompileEngine do
       expect(syms.count).to eq(1)
     end
   end
+
+  it "handles while statements" do
+    input = <<-EOF
+      class Foo {
+        function void bar() {
+          while(true) {
+            let a = 0;
+            let b = 0;
+          }
+        }
+      }
+    EOF
+
+    eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
+    eng.process!
+
+    #puts doc.to_s.gsub(/></,">\n<")
+    statements = doc.elements.to_a( "//statements" )
+    expect(statements.count).to eq(2)
+    while_expr = statements.first.children.first
+    expect(while_expr.name).to eq('whileStatement')
+    expect(while_expr.children.map(&:text).compact).to eq(['while','(',')','{','}'])
+    exprs = while_expr.elements.to_a('expression')
+    expect(exprs.count).to eq(1)
+    terms = exprs.first.elements.to_a('term')
+    expect(terms.count).to eq(1)
+
+    # Needs to handle nesting in the while statement
+    expect(statements[1].elements.to_a('letStatement').count).to eq(2)
+  end
+
+  it "handles if/else statements" do
+    input = <<-EOF
+      class Foo {
+        function void bar() {
+          if(true) {
+            let a = 0;
+          } else {
+            let a = 1;
+          }
+        }
+      }
+    EOF
+
+    eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
+    eng.process!
+
+    puts doc.to_s.gsub(/></,">\n<")
+    statements = doc.elements.to_a( "//statements" )
+    expect(statements.count).to eq(2)
+    if_expr = statements.first.children.first
+    expect(if_expr.name).to eq('ifStatement')
+    expect(if_expr.children.map(&:text).compact).to eq(['if','(',')','{','}','else','{','}'])
+    exprs = if_expr.elements.to_a('expression')
+    expect(exprs.count).to eq(1)
+    terms = exprs.first.elements.to_a('term')
+    expect(terms.count).to eq(1)
+
+    # Needs to handle nesting in the if statement
+    expect(statements[1].elements.to_a('letStatement').count).to eq(1)
+
+    else_expr = statements[1].children.first
+    #expect(_expr.name).to eq('ifStatement')
+
+  end
 end

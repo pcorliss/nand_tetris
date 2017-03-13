@@ -40,6 +40,7 @@ class CompileEngine
     @token_idx = 0
     @subroutine = false
     @statement = false
+    @pops = []
   end
 
   def process!
@@ -49,13 +50,13 @@ class CompileEngine
         self.send(KEYWORD_LOOKUP[token])
       elsif type == 'symbol' && CLOSING_SYMBOLS.include?(token)
         if @statement
-          @stack.pop
+          @pops << @stack.pop
           @statement = false
         end
         top.add_element(type).text = token
-        @stack.pop
+        @pops << @stack.pop
         if @subroutine
-          @stack.pop
+          @pops << @stack.pop
           @subroutine = false
         end
       end
@@ -237,10 +238,6 @@ class CompileEngine
     i
   end
 
-  def compile_while
-
-  end
-
   def compile_return
     create_statement
     @stack << top.add_element('returnStatement')
@@ -256,7 +253,35 @@ class CompileEngine
     @stack.pop
   end
 
-  def compile_if
+  def compile_while
+    create_statement
+    @stack << top.add_element('whileStatement')
+    top.add_element('keyword').text = 'while'
+    top.add_element('symbol').text = '('
+    i = compile_expression(2 , ')')
+    top.add_element('symbol').text = ')'
+    top.add_element('symbol').text = '{'
+    @token_idx += (i + 1)
+    @stack << top.add_element('statements')
+  end
 
+  def compile_if
+    create_statement
+    @stack << top.add_element('ifStatement')
+    top.add_element('keyword').text = 'if'
+    top.add_element('symbol').text = '('
+    i = compile_expression(2 , ')')
+    top.add_element('symbol').text = ')'
+    top.add_element('symbol').text = '{'
+    @token_idx += (i + 1)
+    @stack << top.add_element('statements')
+  end
+
+  def compile_else
+    puts "LastPop: #{@pops.inspect}"
+    top.add_element('keyword').text = 'else'
+    top.add_element('symbol').text = '{'
+    @token_idx += 1
+    @stack << top.add_element('statements')
   end
 end
