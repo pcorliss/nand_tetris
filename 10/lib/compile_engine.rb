@@ -47,7 +47,10 @@ class CompileEngine
       if type == 'keyword' && KEYWORD_LOOKUP[token]
         self.send(KEYWORD_LOOKUP[token])
       elsif type == 'symbol' && CLOSING_SYMBOLS.include?(token)
-        # pop out of statement
+        if @statement
+          @stack.pop
+          @statement = false
+        end
         top.add_element(type).text = token
         @stack.pop
         if @subroutine
@@ -143,10 +146,53 @@ class CompileEngine
     @stack.pop
   end
 
+  def create_statement
+    return if @statement
+    @stack << top.add_element('statements')
+    @statement = true
+  end
   # do square.dispose();
   # do square.dispose(a, b);
   def compile_do
+    create_statement
+    @stack << top.add_element('doStatement')
+    last_token = nil
+    i = 0
+    while(last_token != '(')
+      type, token = get_token(i)
+      top.add_element(type).text = token
+      i += 1
+      last_token = token
+    end
+    i = compile_do_expression(i)
+    while(last_token != ';')
+      type, token = get_token(i)
+      top.add_element(type).text = token
+      i += 1
+      last_token = token
+    end
+    @token_idx += i - 1
+    @stack.pop
+  end
 
+  def compile_do_expression(idx)
+    @stack << top.add_element('expressionList')
+    i = idx
+    while(get_token(i).last != ')')
+      type, token = get_token(i)
+      if token == ','
+        top.add_element(type).text = token
+      else
+        @stack << top.add_element('expression')
+        @stack << top.add_element('term')
+        top.add_element(type).text = token
+        @stack.pop
+        @stack.pop
+      end
+      i += 1
+    end
+    @stack.pop
+    i
   end
 
   # let x = y;
@@ -160,7 +206,18 @@ class CompileEngine
   end
 
   def compile_return
-
+    create_statement
+    @stack << top.add_element('returnStatement')
+    last_token = nil
+    i = 0
+    while(last_token != ';')
+      type, token = get_token(i)
+      top.add_element(type).text = token
+      i += 1
+      last_token = token
+    end
+    @token_idx += i - 1
+    @stack.pop
   end
 
   def compile_if

@@ -97,7 +97,7 @@ describe CompileEngine do
   end
 
   describe "compile statements" do
-    xit "handles returns" do
+    it "handles returns" do
       input = <<-EOF
         class Foo {
           function int bar() {
@@ -112,7 +112,32 @@ describe CompileEngine do
       statements = doc.elements.to_a( "//statements" )
       expect(statements.count).to eq(1)
       expect(statements.first.children.first.name).to eq('returnStatement')
+      expect(statements.first.children.first.children.map(&:text)).to eq(['return', '0', ';'])
     end
 
+    it "handles dos" do
+      input = <<-EOF
+        class Foo {
+          function void bar() {
+            do game.run(x, y);
+            do game.empty();
+          }
+        }
+      EOF
+
+      eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
+      eng.process!
+
+      puts doc.to_s.gsub(/></,">\n<")
+      statements = doc.elements.to_a( "//statements" )
+      expect(statements.count).to eq(1)
+      do_expr = statements.first.children.first
+      expect(do_expr.name).to eq('doStatement')
+      expect(do_expr.children.map(&:text).compact).to eq(['do', 'game', '.', 'run', '(', ')', ';'])
+      expr_list = do_expr.elements.to_a('expressionList')
+      expect(expr_list.count).to eq(1)
+      exprs = expr_list.first.elements.to_a('expression')
+      expect(exprs.count).to eq(2)
+    end
   end
 end
