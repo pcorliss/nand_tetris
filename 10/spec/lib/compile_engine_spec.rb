@@ -248,7 +248,7 @@ describe CompileEngine do
           if(true) {
             let a = 0;
           } else {
-            let a = 1;
+            let b = 1;
           }
         }
       }
@@ -257,22 +257,42 @@ describe CompileEngine do
     eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
     eng.process!
 
-    puts doc.to_s.gsub(/></,">\n<")
-    statements = doc.elements.to_a( "//statements" )
-    expect(statements.count).to eq(2)
-    if_expr = statements.first.children.first
+    #puts doc.to_s.gsub(/></,">\n<")
+    if_statements = doc.elements.to_a( "//ifStatement" )
+    expect(if_statements.count).to eq(1)
+    if_expr = if_statements.first
+
     expect(if_expr.name).to eq('ifStatement')
     expect(if_expr.children.map(&:text).compact).to eq(['if','(',')','{','}','else','{','}'])
     exprs = if_expr.elements.to_a('expression')
     expect(exprs.count).to eq(1)
     terms = exprs.first.elements.to_a('term')
     expect(terms.count).to eq(1)
-
-    # Needs to handle nesting in the if statement
-    expect(statements[1].elements.to_a('letStatement').count).to eq(1)
-
-    else_expr = statements[1].children.first
-    #expect(_expr.name).to eq('ifStatement')
-
   end
+
+  #describe "exrpressionless" do
+    #def strip_whitespace(str)
+      #str.gsub!(/\s+/, '')
+    #end
+
+    #eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
+    #eng.process!
+    #let(:main)                { strip_whitespace CompileEngine.new(Tokenizer.new(File.open('spec/fixtures/ExpressionLessSquare/Main.jack')).types, doc).process!;doc.to_s }
+    #let(:square)              { strip_whitespace CompileEngine.new(Tokenizer.new(File.open('spec/fixtures/ExpressionLessSquare/Square.jack')).types, doc).process!;doc.to_s }
+    #let(:squer_game)          { strip_whitespace CompileEngine.new(Tokenizer.new(File.open('spec/fixtures/ExpressionLessSquare/SqaureGame.jack')).types, doc).process!;doc.to_s }
+    #let(:main_expected)       { strip_whitespace(File.read('spec/fixtures/ExpressionLessSquare/Main.xml')) }
+    #let(:square_expected)     { strip_whitespace(File.read('spec/fixtures/ExpressionLessSquare/Square.xml')) }
+    #let(:squer_game_expected) { strip_whitespace(File.read('spec/fixtures/ExpressionLessSquare/SquareGame.xml')) }
+
+
+    #it "has identical output for main" do
+      #expect(main).to eq(main_expected)
+    #end
+    #it "has identical output for square" do
+      #expect(square).to eq(square_expected)
+    #end
+    #it "has identical output for square_game" do
+      #expect(square_game).to eq(square_game_expected)
+    #end
+  #end
 end

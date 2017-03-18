@@ -278,10 +278,11 @@ class CompileEngine
   end
 
   def compile_else
-    puts "LastPop: #{@pops.inspect}"
+    @pops.pop # statement
+    @stack << @pops.pop # if statement
     top.add_element('keyword').text = 'else'
     top.add_element('symbol').text = '{'
     @token_idx += 1
-    @stack << top.add_element('statements')
+    create_statement
   end
 end
