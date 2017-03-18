@@ -1,4 +1,5 @@
 require './lib/compile_engine.rb'
+require './lib/tokenizer.rb'
 require 'pry'
 
 describe CompileEngine do
@@ -54,7 +55,9 @@ describe CompileEngine do
       #puts doc.to_s.gsub(/></,">\n<")
       subs = doc.root.children.select {|e| e.name == 'subroutineDec'}
       #puts subs.map(&:to_s).inspect
-      returns = subs.map { |s| s.children.select {|e| e.name == 'identifier' }.first.text }.flatten
+      returns = subs.map { |s| s.children.select {|e| ['identifier','keyword'].include? e.name }[1] }.flatten
+      returns_names = returns.map(&:name)
+      returns_vals = returns.map(&:text)
       ids = subs.map { |s| s.children.select {|e| e.name == 'identifier' }.last.text }.flatten
       #puts ids.map(&:to_s).inspect
       param_lists = subs.map { |s| s.children.find { |e| e.name == 'parameterList' } }
@@ -67,7 +70,8 @@ describe CompileEngine do
       expect(doc.root.name).to eq('class')
       expect(subs.count).to eq(3)
       expect(ids).to eq(['new', 'move', 'bar'])
-      expect(returns).to eq(['Foo', 'void', 'int'])
+      expect(returns_vals).to eq(['Foo', 'void', 'int'])
+      expect(returns_names).to eq(['identifier', 'keyword', 'keyword'])
       expect(param_idents.map(&:count)).to eq([0, 1, 2])
       expect(sub_body.count).to eq(3)
     end
@@ -97,22 +101,81 @@ describe CompileEngine do
   end
 
   describe "compile statements" do
-    it "handles returns" do
-      input = <<-EOF
-        class Foo {
-          function int bar() {
-            return 0;
+    context "returns" do
+      it "handles returns" do
+        input = <<-EOF
+          class Foo {
+            function int bar() {
+              return;
+            }
           }
-        }
+        EOF
+
+        eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
+        eng.process!
+
+        #puts eng.to_s(strip_whitespace: true, newlines: true, fix_empty: true)
+        statements = doc.elements.to_a( "//statements" )
+        expect(statements.count).to eq(1)
+
+        return_statement = statements.first.children.first
+        expect(statements.first.children.first.name).to eq('returnStatement')
+        expected = <<-EOF
+<returnStatement>
+<keyword>return</keyword>
+<symbol>;</symbol>
+</returnStatement>
+        EOF
+        expect(return_statement.to_s.gsub('><',">\n<") + "\n").to eq(expected)
+      end
+
+      it "handles expression returns" do
+        input = <<-EOF
+          class Foo {
+            function int bar() {
+              return x;
+            }
+          }
+        EOF
+
+        eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
+        eng.process!
+
+        #puts eng.to_s(strip_whitespace: true, newlines: true, fix_empty: true)
+        statements = doc.elements.to_a( "//statements" )
+        expect(statements.count).to eq(1)
+        return_statement = statements.first.children.first
+        expect(statements.first.children.first.name).to eq('returnStatement')
+        expected = <<-EOF
+<returnStatement>
+<keyword>return</keyword>
+<expression>
+<term>
+<identifier>x</identifier>
+</term>
+</expression>
+<symbol>;</symbol>
+</returnStatement>
       EOF
+        expect(return_statement.to_s.gsub('><',">\n<") + "\n").to eq(expected)
 
-      eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
-      eng.process!
+      end
 
-      statements = doc.elements.to_a( "//statements" )
-      expect(statements.count).to eq(1)
-      expect(statements.first.children.first.name).to eq('returnStatement')
-      expect(statements.first.children.first.children.map(&:text)).to eq(['return', '0', ';'])
+      it "leaves the stack in good shape" do
+        input = <<-EOF
+          class Foo {
+            function int bar() {
+              return;
+            }
+          }
+        EOF
+
+        eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
+        eng.process!
+
+        #puts eng.to_s(strip_whitespace: true, newlines: true, fix_empty: true)
+        expect(doc.root.children.last.text).to eq('}')
+      end
     end
 
     it "handles dos" do
@@ -263,36 +326,76 @@ describe CompileEngine do
     if_expr = if_statements.first
 
     expect(if_expr.name).to eq('ifStatement')
-    expect(if_expr.children.map(&:text).compact).to eq(['if','(',')','{','}','else','{','}'])
+
+    child_terms = if_expr.children.map do |e|
+      [e.name, e.text]
+    end
+    expected_terms = [
+      ['keyword', 'if'],
+      ['symbol', '('],
+      ['expression', nil],
+      ['symbol', ')'],
+      ['symbol', '{'],
+      ['statements', nil],
+      ['symbol', '}'],
+      ['keyword', 'else'],
+      ['symbol', '{'],
+      ['statements', nil],
+      ['symbol', '}'],
+    ]
+    expect(child_terms).to eq(expected_terms)
+
     exprs = if_expr.elements.to_a('expression')
     expect(exprs.count).to eq(1)
     terms = exprs.first.elements.to_a('term')
     expect(terms.count).to eq(1)
   end
 
-  #describe "exrpressionless" do
-    #def strip_whitespace(str)
-      #str.gsub!(/\s+/, '')
-    #end
+  describe "exrpressionless" do
+    def strip_whitespace(str)
+      str.gsub!(/\s+/, '')
+      str
+    end
 
-    #eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
-    #eng.process!
-    #let(:main)                { strip_whitespace CompileEngine.new(Tokenizer.new(File.open('spec/fixtures/ExpressionLessSquare/Main.jack')).types, doc).process!;doc.to_s }
-    #let(:square)              { strip_whitespace CompileEngine.new(Tokenizer.new(File.open('spec/fixtures/ExpressionLessSquare/Square.jack')).types, doc).process!;doc.to_s }
-    #let(:squer_game)          { strip_whitespace CompileEngine.new(Tokenizer.new(File.open('spec/fixtures/ExpressionLessSquare/SqaureGame.jack')).types, doc).process!;doc.to_s }
-    #let(:main_expected)       { strip_whitespace(File.read('spec/fixtures/ExpressionLessSquare/Main.xml')) }
-    #let(:square_expected)     { strip_whitespace(File.read('spec/fixtures/ExpressionLessSquare/Square.xml')) }
-    #let(:squer_game_expected) { strip_whitespace(File.read('spec/fixtures/ExpressionLessSquare/SquareGame.xml')) }
+    let(:main_fh)                 { File.open('spec/fixtures/ExpressionLessSquare/Main.jack') }
+    let(:square_fh)               { File.open('spec/fixtures/ExpressionLessSquare/Square.jack') }
+    let(:square_game_fh)          { File.open('spec/fixtures/ExpressionLessSquare/SquareGame.jack') }
+    let(:main_expected)        { strip_whitespace(File.read('spec/fixtures/ExpressionLessSquare/Main.xml')).gsub(/></,">\n<") }
+    let(:square_expected)      { strip_whitespace(File.read('spec/fixtures/ExpressionLessSquare/Square.xml')).gsub(/></,">\n<") }
+    let(:square_game_expected) { strip_whitespace(File.read('spec/fixtures/ExpressionLessSquare/SquareGame.xml')).gsub(/></,">\n<") }
 
 
-    #it "has identical output for main" do
-      #expect(main).to eq(main_expected)
-    #end
-    #it "has identical output for square" do
-      #expect(square).to eq(square_expected)
-    #end
-    #it "has identical output for square_game" do
-      #expect(square_game).to eq(square_game_expected)
-    #end
-  #end
+    it "has identical output for main" do
+      t = Tokenizer.new(main_fh)
+      t.strip!
+      ce = CompileEngine.new(t.types, doc)
+      ce.process!
+      #m = strip_whitespace(doc.to_s).gsub(/></,">\n<")
+      m = ce.to_s(strip_whitespace: true, newlines: true, fix_empty: true)
+      #puts m
+      expect(m).to eq(main_expected)
+    end
+
+    it "has identical output for square" do
+      t = Tokenizer.new(square_fh)
+      t.strip!
+      ce = CompileEngine.new(t.types, doc)
+      ce.process!
+      #m = strip_whitespace(doc.to_s).gsub(/></,">\n<")
+      m = ce.to_s(strip_whitespace: true, newlines: true, fix_empty: true)
+      #puts m
+      expect(m).to eq(square_expected)
+    end
+
+    it "has identical output for square_game" do
+      t = Tokenizer.new(square_game_fh)
+      t.strip!
+      ce = CompileEngine.new(t.types, doc)
+      ce.process!
+      #m = strip_whitespace(doc.to_s).gsub(/></,">\n<")
+      m = ce.to_s(strip_whitespace: true, newlines: true, fix_empty: true)
+      #puts m
+      expect(m).to eq(square_game_expected)
+    end
+  end
 end
