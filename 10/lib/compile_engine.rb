@@ -206,11 +206,12 @@ class CompileEngine
       if token == ','
         top.add_element(type).text = token
       else
-        @stack << top.add_element('expression')
-        @stack << top.add_element('term')
-        top.add_element(type).text = token
-        @stack.pop
-        @stack.pop
+        i = compile_expression(i, [',', ')']) - 1
+        #@stack << top.add_element('expression')
+        #@stack << top.add_element('term')
+        #top.add_element(type).text = token
+        #@stack.pop
+        #@stack.pop
       end
       i += 1
     end
@@ -246,6 +247,10 @@ class CompileEngine
   end
 
   def compile_expression(idx,stop_token)
+    if stop_token.is_a? String
+      stop_token = [stop_token]
+    end
+
     i = idx
     @stack << top.add_element('expression')
     @stack << top.add_element('term')
@@ -263,7 +268,7 @@ class CompileEngine
     # term ( = expression list
 
 
-    while(get_token(i).last != stop_token)
+    while(!stop_token.include?(get_token(i).last))
       put_status "While #{i} #{get_token(i)}:"
       type, token = get_token(i)
       # expression list

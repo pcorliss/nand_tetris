@@ -339,7 +339,7 @@ describe CompileEngine do
     let(:square_game_expected) { strip_whitespace(File.read('spec/fixtures/ExpressionLessSquare/SquareGame.xml')).gsub(/></,">\n<") }
 
 
-    xit "has identical output for main" do
+    it "has identical output for main" do
       t = Tokenizer.new(main_fh)
       t.strip!
       ce = CompileEngine.new(t.types, doc)
@@ -350,7 +350,7 @@ describe CompileEngine do
       expect(m).to eq(main_expected)
     end
 
-    xit "has identical output for square" do
+    it "has identical output for square" do
       t = Tokenizer.new(square_fh)
       t.strip!
       ce = CompileEngine.new(t.types, doc)
@@ -361,7 +361,7 @@ describe CompileEngine do
       expect(m).to eq(square_expected)
     end
 
-    xit "has identical output for square_game" do
+    it "has identical output for square_game" do
       t = Tokenizer.new(square_game_fh)
       t.strip!
       ce = CompileEngine.new(t.types, doc)
@@ -616,6 +616,66 @@ describe CompileEngine do
         #puts m
         expect(prepare(m)).to eq(prepare(expected))
       end
+
+      it "handles do statements with expressions and expression lists" do
+        expected = <<-EOF
+          <doStatement>
+            <keyword> do </keyword>
+            <identifier> Screen </identifier>
+            <symbol> . </symbol>
+            <identifier> drawRectangle </identifier>
+            <symbol> ( </symbol>
+            <expressionList>
+              <expression>
+                <term>
+                  <identifier> x </identifier>
+                </term>
+              </expression>
+              <symbol> , </symbol>
+              <expression>
+                <term>
+                  <identifier> y </identifier>
+                </term>
+              </expression>
+              <symbol> , </symbol>
+              <expression>
+                <term>
+                  <identifier> x </identifier>
+                </term>
+                <symbol> + </symbol>
+                <term>
+                  <identifier> size </identifier>
+                </term>
+              </expression>
+              <symbol> , </symbol>
+              <expression>
+                <term>
+                  <identifier> y </identifier>
+                </term>
+                <symbol> + </symbol>
+                <term>
+                  <identifier> size </identifier>
+                </term>
+              </expression>
+            </expressionList>
+            <symbol> ) </symbol>
+            <symbol> ; </symbol>
+          </doStatement>
+        EOF
+        input = <<-EOF
+          class Foo {
+            function void bar() {
+              do Screen.drawRectangle(x, y, x + size, y + size);
+            }
+          }
+        EOF
+
+        eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
+        eng.process!
+        m = doc.elements.to_a('//doStatement').first.to_s
+        #puts m
+        expect(prepare(m)).to eq(prepare(expected))
+      end
     end
 
     it "has identical output for main" do
@@ -628,7 +688,7 @@ describe CompileEngine do
       expect(m).to eq(main_expected)
     end
 
-    xit "has identical output for square" do
+    it "has identical output for square" do
       t = Tokenizer.new(square_fh)
       t.strip!
       ce = CompileEngine.new(t.types, doc)
