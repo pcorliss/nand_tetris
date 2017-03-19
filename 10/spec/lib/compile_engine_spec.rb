@@ -540,7 +540,38 @@ describe CompileEngine do
         expect(prepare(m)).to eq(prepare(expected))
       end
 
-      it "handles let statements with unary ops"
+      it "handles while statements with unary ops" do
+        expected = <<-EOF
+          <whileStatement>
+            <keyword> while </keyword>
+            <symbol> ( </symbol>
+            <expression>
+              <term>
+                <symbol> ~ </symbol>
+                <term>
+                  <identifier> exit </identifier>
+                </term>
+              </term>
+            </expression>
+            <symbol> ) </symbol>
+            <symbol> { </symbol>
+            <statements/>
+            <symbol> } </symbol>
+          </whileStatement>
+        EOF
+        input = <<-EOF
+          class Foo {
+            function void bar() {
+              while (~exit) {}
+            }
+          }
+        EOF
+
+        eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
+        eng.process!
+        m = doc.elements.to_a('//whileStatement').first.to_s
+        expect(prepare(m)).to eq(prepare(expected))
+      end
     end
 
     it "has identical output for main" do
@@ -549,7 +580,7 @@ describe CompileEngine do
       ce = CompileEngine.new(t.types, doc)
       ce.process!
       m = ce.to_s(strip_whitespace: true, newlines: true, fix_empty: true)
-      puts m
+      #puts m
       expect(m).to eq(main_expected)
     end
 
@@ -563,7 +594,7 @@ describe CompileEngine do
       expect(m).to eq(square_expected)
     end
 
-    xit "has identical output for square_game" do
+    it "has identical output for square_game" do
       t = Tokenizer.new(square_game_fh)
       t.strip!
       ce = CompileEngine.new(t.types, doc)

@@ -31,6 +31,7 @@ CLOSING_SYMBOLS = ['}']
 TERM_CLOSURES = [';', ']']
 OP = ['+', '-', '*', '/', '&', '|', '<', '>', '=']
 UNARY = ['-', '~']
+OP_UNARY = OP + UNARY
 
 class CompileEngine
   attr_reader :doc
@@ -276,7 +277,7 @@ class CompileEngine
       elsif(token == '[')
         top.add_element(type).text = token
         i = compile_expression(i + 1, ']') - 1
-      elsif type == 'symbol' && OP.include?(token)
+      elsif type == 'symbol' && OP_UNARY.include?(token)
         if (i == idx)
           top.add_element(type).text = token
           @stack << top.add_element('term')
@@ -305,9 +306,9 @@ class CompileEngine
   end
 
   def put_status(prefix = "")
-    puts "#{prefix} Current Token: #{get_token(0).inspect}"
-    puts "#{prefix} Current Stack: #{top.inspect}"
-    puts "#{prefix} Current Tokens: #{@token_idx} #{@tokens[@token_idx - 1..@token_idx + 1].map(&:last).inspect}"
+    #puts "#{prefix} Current Token: #{get_token(0).inspect}"
+    #puts "#{prefix} Current Stack: #{top.inspect}"
+    #puts "#{prefix} Current Tokens: #{@token_idx} #{@tokens[@token_idx - 1..@token_idx + 1].map(&:last).inspect}"
   end
 
   def compile_return
