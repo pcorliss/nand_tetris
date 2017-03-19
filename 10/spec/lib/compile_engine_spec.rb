@@ -751,6 +751,80 @@ describe CompileEngine do
         #puts m
         expect(prepare(m)).to eq(prepare(expected))
       end
+
+      it "handles do statements with complicated expression lists with expressions mixed in" do
+        expected = <<-EOF
+            <doStatement>
+              <keyword> do </keyword>
+              <identifier> Screen </identifier>
+              <symbol> . </symbol>
+              <identifier> drawRectangle </identifier>
+              <symbol> ( </symbol>
+              <expressionList>
+                <expression>
+                  <term>
+                    <identifier> x </identifier>
+                  </term>
+                </expression>
+                <symbol> , </symbol>
+                <expression>
+                  <term>
+                    <symbol> ( </symbol>
+                    <expression>
+                      <term>
+                        <identifier> y </identifier>
+                      </term>
+                      <symbol> + </symbol>
+                      <term>
+                        <identifier> size </identifier>
+                      </term>
+                    </expression>
+                    <symbol> ) </symbol>
+                  </term>
+                  <symbol> - </symbol>
+                  <term>
+                    <integerConstant> 1 </integerConstant>
+                  </term>
+                </expression>
+                <symbol> , </symbol>
+                <expression>
+                  <term>
+                    <identifier> x </identifier>
+                  </term>
+                  <symbol> + </symbol>
+                  <term>
+                    <identifier> size </identifier>
+                  </term>
+                </expression>
+                <symbol> , </symbol>
+                <expression>
+                  <term>
+                    <identifier> y </identifier>
+                  </term>
+                  <symbol> + </symbol>
+                  <term>
+                    <identifier> size </identifier>
+                  </term>
+                </expression>
+              </expressionList>
+              <symbol> ) </symbol>
+              <symbol> ; </symbol>
+            </doStatement>
+        EOF
+        input = <<-EOF
+          class Foo {
+            function void bar() {
+              do Screen.drawRectangle(x, (y + size) - 1, x + size, y + size);
+            }
+          }
+        EOF
+
+        eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
+        eng.process!
+        m = doc.elements.to_a('//doStatement').first.to_s
+        #puts m
+        expect(prepare(m)).to eq(prepare(expected))
+      end
     end
 
     it "has identical output for main" do

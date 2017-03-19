@@ -32,7 +32,7 @@ TERM_CLOSURES = [';', ']']
 OP = ['+', '-', '*', '/', '&', '|', '<', '>', '=']
 UNARY = ['-', '~']
 OP_UNARY = OP + UNARY
-OP_UNARY_PARAN = OP_UNARY + ['(', ')']
+OP_UNARY_PARAN = OP_UNARY + ['(', ')', ',']
 
 class CompileEngine
   attr_reader :doc
@@ -252,7 +252,7 @@ class CompileEngine
       stop_token = [stop_token]
     end
 
-    put_status "Tokens: #{@tokens.map(&:last).inspect}"
+    #puts "Tokens: #{@tokens.map(&:last).inspect}"
 
     i = idx
     @stack << top.add_element('expression')
@@ -275,11 +275,13 @@ class CompileEngine
       previous = get_token(i - 1)
       # expression list
       if token == '(' && (!OP_UNARY_PARAN.include?(previous.last))  # And empty or commas ? or maybe something else
+        #puts "expression list"
         top.add_element(type).text = token
         i = compile_do_expression(i + 1) - 1
       # nested expression
       elsif token == '(' # Can it handled nested parans?
         #puts "Fired!"
+        #puts "expression"
         top.add_element(type).text = token
         i = compile_expression(i + 1, ')')
         top.add_element(type).text = ')'
