@@ -248,7 +248,6 @@ class CompileEngine
     i = idx
     @stack << top.add_element('expression')
     @stack << top.add_element('term')
-
     # i * j
     # (..) * j
     # i * (..)
@@ -278,9 +277,14 @@ class CompileEngine
         top.add_element(type).text = token
         i = compile_expression(i + 1, ']') - 1
       elsif type == 'symbol' && OP.include?(token)
-        @stack.pop if i != idx
-        top.add_element(type).text = token
-        @stack << top.add_element('term') if i != idx
+        if (i == idx)
+          top.add_element(type).text = token
+          @stack << top.add_element('term')
+        else
+          @stack.pop
+          top.add_element(type).text = token
+          @stack << top.add_element('term')
+        end
       else
         #if top.name != 'term'
           #@stack << top.add_element('term')
@@ -293,7 +297,9 @@ class CompileEngine
       i += 1
     end
 
-    @stack.pop if in_term?
+    until !in_term? do
+      @stack.pop
+    end
     @stack.pop
     i
   end
