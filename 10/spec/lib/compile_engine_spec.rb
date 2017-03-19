@@ -676,6 +676,81 @@ describe CompileEngine do
         #puts m
         expect(prepare(m)).to eq(prepare(expected))
       end
+
+      it "handles if statements with complicated expressions" do
+        expected = <<-EOF
+        <ifStatement>
+          <keyword> if </keyword>
+          <symbol> ( </symbol>
+          <expression>
+            <term>
+              <symbol> ( </symbol>
+              <expression>
+                <term>
+                  <symbol> ( </symbol>
+                  <expression>
+                    <term>
+                      <identifier> y </identifier>
+                    </term>
+                    <symbol> + </symbol>
+                    <term>
+                      <identifier> size </identifier>
+                    </term>
+                  </expression>
+                  <symbol> ) </symbol>
+                </term>
+                <symbol> &lt; </symbol>
+                <term>
+                  <integerConstant> 254 </integerConstant>
+                </term>
+              </expression>
+              <symbol> ) </symbol>
+            </term>
+            <symbol> &amp; </symbol>
+            <term>
+              <symbol> ( </symbol>
+              <expression>
+                <term>
+                  <symbol> ( </symbol>
+                  <expression>
+                    <term>
+                      <identifier> x </identifier>
+                    </term>
+                    <symbol> + </symbol>
+                    <term>
+                      <identifier> size </identifier>
+                    </term>
+                  </expression>
+                  <symbol> ) </symbol>
+                </term>
+                <symbol> &lt; </symbol>
+                <term>
+                  <integerConstant> 510 </integerConstant>
+                </term>
+              </expression>
+              <symbol> ) </symbol>
+            </term>
+          </expression>
+          <symbol> ) </symbol>
+          <symbol> { </symbol>
+          <statements/>
+          <symbol> } </symbol>
+        </ifStatement>
+        EOF
+        input = <<-EOF
+          class Foo {
+            function void bar() {
+              if(((y + size) < 254) & ((x + size) < 510)) {}
+            }
+          }
+        EOF
+
+        eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
+        eng.process!
+        m = doc.elements.to_a('//ifStatement').first.to_s
+        #puts m
+        expect(prepare(m)).to eq(prepare(expected))
+      end
     end
 
     it "has identical output for main" do
