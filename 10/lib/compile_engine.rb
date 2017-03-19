@@ -264,15 +264,18 @@ class CompileEngine
 
 
     while(get_token(i).last != stop_token)
+      put_status "While #{i} #{get_token(i)}:"
       type, token = get_token(i)
       # expression list
-      if token == '(' && !OP.include?(get_token(i - 1).last)  # And empty or commas ? or maybe something else
+      if token == '(' && !OP_UNARY.include?(get_token(i - 1).last)  # And empty or commas ? or maybe something else
         top.add_element(type).text = token
         i = compile_do_expression(i + 1) - 1
       # nested expression
       elsif token == '(' # Can it handled nested parans?
         top.add_element(type).text = token
-        i = compile_expression(i + 1, ')') - 1
+        i = compile_expression(i + 1, ')')
+        top.add_element(type).text = ')'
+        #binding.pry
       # nested expression
       elsif(token == '[')
         top.add_element(type).text = token

@@ -572,6 +572,50 @@ describe CompileEngine do
         m = doc.elements.to_a('//whileStatement').first.to_s
         expect(prepare(m)).to eq(prepare(expected))
       end
+
+      it "handles while statements with unary ops and equality" do
+        expected = <<-EOF
+          <whileStatement>
+            <keyword> while </keyword>
+            <symbol> ( </symbol>
+            <expression>
+              <term>
+                <symbol> ~ </symbol>
+                <term>
+                  <symbol> ( </symbol>
+                  <expression>
+                    <term>
+                      <identifier> key </identifier>
+                    </term>
+                    <symbol> = </symbol>
+                    <term>
+                      <integerConstant> 0 </integerConstant>
+                    </term>
+                  </expression>
+                  <symbol> ) </symbol>
+                </term>
+              </term>
+            </expression>
+            <symbol> ) </symbol>
+            <symbol> { </symbol>
+            <statements/>
+            <symbol> } </symbol>
+          </whileStatement>
+        EOF
+        input = <<-EOF
+          class Foo {
+            function void bar() {
+              while (~(key = 0)) {}
+            }
+          }
+        EOF
+
+        eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
+        eng.process!
+        m = doc.elements.to_a('//whileStatement').first.to_s
+        #puts m
+        expect(prepare(m)).to eq(prepare(expected))
+      end
     end
 
     it "has identical output for main" do
