@@ -29,6 +29,8 @@ KEYWORD_LOOKUP = {
 
 CLOSING_SYMBOLS = ['}']
 TERM_CLOSURES = [';', ']']
+OP = ['+', '-', '*', '/', '&', '|', '<', '>', '=']
+UNARY = ['-', '~']
 
 class CompileEngine
   attr_reader :doc
@@ -238,38 +240,60 @@ class CompileEngine
     @stack.pop
   end
 
+  def in_term?
+    top.name == 'term'
+  end
+
   def compile_expression(idx,stop_token)
     i = idx
     @stack << top.add_element('expression')
     @stack << top.add_element('term')
 
+    # i * j
+    # (..) * j
+    # i * (..)
+    # (..) * (..)
+    # i * j * k = unhandled
+    # ~true = bool/unary
+    # -j = booleans/unary
+    # a[i] = compile_do_expression
+    # a(i, j) = parameter list handling
+
+    # operator ( = expression
+    # term ( = expression list
+
 
     while(get_token(i).last != stop_token)
       type, token = get_token(i)
-      if(token == '(') # And empty or commas ? or maybe something else
+      # expression list
+      if token == '(' && !OP.include?(get_token(i - 1).last)  # And empty or commas ? or maybe something else
         top.add_element(type).text = token
         i = compile_do_expression(i + 1) - 1
+      # nested expression
+      elsif token == '(' # Can it handled nested parans?
+        top.add_element(type).text = token
+        i = compile_expression(i + 1, ')') - 1
+      # nested expression
       elsif(token == '[')
         top.add_element(type).text = token
         i = compile_expression(i + 1, ']') - 1
-      else
+      elsif type == 'symbol' && OP.include?(token)
+        @stack.pop if i != idx
         top.add_element(type).text = token
+        @stack << top.add_element('term') if i != idx
+      else
+        #if top.name != 'term'
+          #@stack << top.add_element('term')
+          #top.add_element(type).text = token
+          #@stack.pop
+        #else
+          top.add_element(type).text = token
+        #end
       end
       i += 1
     end
 
-    #while(get_token(i).last != stop_token)
-      #type, token = get_token(i)
-      #if(type == 'symbol')
-        #top.add_element(type).text = token
-      #else
-        #@stack << top.add_element('term')
-        #top.add_element(type).text = token
-        #@stack.pop
-      #end
-      #i += 1
-    #end
-    @stack.pop
+    @stack.pop if in_term?
     @stack.pop
     i
   end

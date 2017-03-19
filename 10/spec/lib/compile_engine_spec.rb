@@ -539,6 +539,8 @@ describe CompileEngine do
         m = doc.elements.to_a('//letStatement').first.to_s
         expect(prepare(m)).to eq(prepare(expected))
       end
+
+      it "handles let statements with unary ops"
     end
 
     it "has identical output for main" do
