@@ -246,32 +246,6 @@ describe CompileEngine do
       exprs = let_expr.elements.to_a('expression')
       expect(exprs.count).to eq(2)
     end
-
-    it "handles lets with more complex post = terms" do
-      input = <<-EOF
-        class Foo {
-          function void bar() {
-            let a = j | b;
-          }
-        }
-      EOF
-
-      eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
-      eng.process!
-
-      #puts doc.to_s.gsub(/></,">\n<")
-      statements = doc.elements.to_a( "//statements" )
-      expect(statements.count).to eq(1)
-      let_expr = statements.first.children.first
-      expect(let_expr.name).to eq('letStatement')
-      expect(let_expr.children.map(&:text).compact).to eq(['let','a','=',';'])
-      exprs = let_expr.elements.to_a('expression')
-      expect(exprs.count).to eq(1)
-      terms = exprs.first.elements.to_a('term')
-      expect(terms.count).to eq(2)
-      syms = exprs.first.elements.to_a('symbol')
-      expect(syms.count).to eq(1)
-    end
   end
 
   it "handles while statements" do
@@ -365,7 +339,7 @@ describe CompileEngine do
     let(:square_game_expected) { strip_whitespace(File.read('spec/fixtures/ExpressionLessSquare/SquareGame.xml')).gsub(/></,">\n<") }
 
 
-    it "has identical output for main" do
+    xit "has identical output for main" do
       t = Tokenizer.new(main_fh)
       t.strip!
       ce = CompileEngine.new(t.types, doc)
@@ -376,7 +350,7 @@ describe CompileEngine do
       expect(m).to eq(main_expected)
     end
 
-    it "has identical output for square" do
+    xit "has identical output for square" do
       t = Tokenizer.new(square_fh)
       t.strip!
       ce = CompileEngine.new(t.types, doc)
@@ -387,12 +361,211 @@ describe CompileEngine do
       expect(m).to eq(square_expected)
     end
 
-    it "has identical output for square_game" do
+    xit "has identical output for square_game" do
       t = Tokenizer.new(square_game_fh)
       t.strip!
       ce = CompileEngine.new(t.types, doc)
       ce.process!
       #m = strip_whitespace(doc.to_s).gsub(/></,">\n<")
+      m = ce.to_s(strip_whitespace: true, newlines: true, fix_empty: true)
+      #puts m
+      expect(m).to eq(square_game_expected)
+    end
+  end
+
+  describe "expressions" do
+    def strip_whitespace(str)
+      str.gsub!(/\s+/, '')
+      str
+    end
+
+    def prepare(str)
+      strip_whitespace(str).gsub(/></,">\n<")
+    end
+
+    let(:main_fh)                 { File.open('spec/fixtures/Square/Main.jack') }
+    let(:square_fh)               { File.open('spec/fixtures/Square/Square.jack') }
+    let(:square_game_fh)          { File.open('spec/fixtures/Square/SquareGame.jack') }
+    let(:main_expected)           { prepare(File.read('spec/fixtures/Square/Main.xml'))}
+    let(:square_expected)         { prepare(File.read('spec/fixtures/Square/Square.xml'))}
+    let(:square_game_expected)    { prepare(File.read('spec/fixtures/Square/SquareGame.xml'))}
+
+    describe "components" do
+      it "handles let statements with function calls" do
+        expected = <<-EOF
+          <letStatement>
+            <keyword> let </keyword>
+            <identifier> game </identifier>
+            <symbol> = </symbol>
+            <expression>
+              <term>
+                <identifier> SquareGame </identifier>
+                <symbol> . </symbol>
+                <identifier> new </identifier>
+                <symbol> ( </symbol>
+                <expressionList/>
+                <symbol> ) </symbol>
+              </term>
+            </expression>
+            <symbol> ; </symbol>
+          </letStatement>
+        EOF
+        input = <<-EOF
+          class Foo {
+            function void bar() {
+              let game = SquareGame.new();
+            }
+          }
+        EOF
+
+        eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
+        eng.process!
+        m = doc.elements.to_a('//letStatement').first.to_s
+        expect(prepare(m)).to eq(prepare(expected))
+      end
+
+      it "handles let statements with array indexing on the right hand side" do
+        expected = <<-EOF
+          <letStatement>
+            <keyword> let </keyword>
+            <identifier> a </identifier>
+            <symbol> [ </symbol>
+            <expression>
+              <term>
+                <integerConstant> 1 </integerConstant>
+              </term>
+            </expression>
+            <symbol> ] </symbol>
+            <symbol> = </symbol>
+            <expression>
+              <term>
+                <identifier> a </identifier>
+                <symbol> [ </symbol>
+                <expression>
+                  <term>
+                    <integerConstant> 2 </integerConstant>
+                  </term>
+                </expression>
+                <symbol> ] </symbol>
+              </term>
+            </expression>
+            <symbol> ; </symbol>
+          </letStatement>
+        EOF
+        input = <<-EOF
+          class Foo {
+            function void bar() {
+              let a[1] = a[2];
+            }
+          }
+        EOF
+
+        eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
+        eng.process!
+        m = doc.elements.to_a('//letStatement').first.to_s
+        expect(prepare(m)).to eq(prepare(expected))
+      end
+
+
+      it "handles let statements with math and negatives" do
+        expected = <<-EOF
+          <letStatement>
+            <keyword> let </keyword>
+            <identifier> i </identifier>
+            <symbol> = </symbol>
+            <expression>
+              <term>
+                <identifier> i </identifier>
+              </term>
+              <symbol> * </symbol>
+              <term>
+                <symbol> ( </symbol>
+                <expression>
+                  <term>
+                    <symbol> - </symbol>
+                    <term>
+                      <identifier> j </identifier>
+                    </term>
+                  </term>
+                </expression>
+                <symbol> ) </symbol>
+              </term>
+            </expression>
+            <symbol> ; </symbol>
+          </letStatement>
+        EOF
+        input = <<-EOF
+          class Foo {
+            function void bar() {
+              let i = i * (-j);
+            }
+          }
+        EOF
+
+        eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
+        eng.process!
+        m = doc.elements.to_a('//letStatement').first.to_s
+        expect(prepare(m)).to eq(prepare(expected))
+      end
+
+      it "handles let statements with booleans" do
+        expected = <<-EOF
+          <letStatement>
+            <keyword> let </keyword>
+            <identifier> i </identifier>
+            <symbol> = </symbol>
+            <expression>
+              <term>
+                <identifier> i </identifier>
+              </term>
+              <symbol> | </symbol>
+              <term>
+                <identifier> j </identifier>
+              </term>
+            </expression>
+            <symbol> ; </symbol>
+          </letStatement>
+        EOF
+        input = <<-EOF
+          class Foo {
+            function void bar() {
+              let i = i | j;
+            }
+          }
+        EOF
+
+        eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types, doc)
+        eng.process!
+        m = doc.elements.to_a('//letStatement').first.to_s
+        expect(prepare(m)).to eq(prepare(expected))
+      end
+    end
+
+    it "has identical output for main" do
+      t = Tokenizer.new(main_fh)
+      t.strip!
+      ce = CompileEngine.new(t.types, doc)
+      ce.process!
+      m = ce.to_s(strip_whitespace: true, newlines: true, fix_empty: true)
+      puts m
+      expect(m).to eq(main_expected)
+    end
+
+    xit "has identical output for square" do
+      t = Tokenizer.new(square_fh)
+      t.strip!
+      ce = CompileEngine.new(t.types, doc)
+      ce.process!
+      m = ce.to_s(strip_whitespace: true, newlines: true, fix_empty: true)
+      #puts m
+      expect(m).to eq(square_expected)
+    end
+
+    xit "has identical output for square_game" do
+      t = Tokenizer.new(square_game_fh)
+      t.strip!
+      ce = CompileEngine.new(t.types, doc)
+      ce.process!
       m = ce.to_s(strip_whitespace: true, newlines: true, fix_empty: true)
       #puts m
       expect(m).to eq(square_game_expected)

@@ -49,15 +49,15 @@ class CompileEngine
       if type == 'keyword' && KEYWORD_LOOKUP[token]
         self.send(KEYWORD_LOOKUP[token])
       elsif type == 'symbol' && CLOSING_SYMBOLS.include?(token)
-        put_status("ClosingSymbol:")
+        #put_status("ClosingSymbol:")
         if in_statement?
-          put_status("ClosingPreInStatement:")
+          #put_status("ClosingPreInStatement:")
           @pops << @stack.pop
           @statement = false
         end
         top.add_element(type).text = token
         @pops << @stack.pop
-        put_status("ClosingPosttPop:")
+        #put_status("ClosingPosttPop:")
         #if @subroutine
           #puts "Sub1: #{@pops.last.name}"
           #@pops << @stack.pop
@@ -66,13 +66,13 @@ class CompileEngine
         #end
 
         if @pops.last.name == 'subroutineBody'
-          put_status("ClosingPreIsSubBody:")
+          #put_status("ClosingPreIsSubBody:")
           #puts "Sub1: #{@pops.last.name}"
           @pops << @stack.pop
           #puts "Sub2: #{@pops.last.name}"
           @subroutine = false
         end
-        put_status("ClosingPost:")
+        #put_status("ClosingPost:")
       end
       @token_idx += 1
     end
@@ -241,25 +241,43 @@ class CompileEngine
   def compile_expression(idx,stop_token)
     i = idx
     @stack << top.add_element('expression')
+    @stack << top.add_element('term')
+
+
     while(get_token(i).last != stop_token)
       type, token = get_token(i)
-      if(type == 'symbol')
+      if(token == '(') # And empty or commas ? or maybe something else
         top.add_element(type).text = token
+        i = compile_do_expression(i + 1) - 1
+      elsif(token == '[')
+        top.add_element(type).text = token
+        i = compile_expression(i + 1, ']') - 1
       else
-        @stack << top.add_element('term')
         top.add_element(type).text = token
-        @stack.pop
       end
       i += 1
     end
+
+    #while(get_token(i).last != stop_token)
+      #type, token = get_token(i)
+      #if(type == 'symbol')
+        #top.add_element(type).text = token
+      #else
+        #@stack << top.add_element('term')
+        #top.add_element(type).text = token
+        #@stack.pop
+      #end
+      #i += 1
+    #end
+    @stack.pop
     @stack.pop
     i
   end
 
   def put_status(prefix = "")
-    #puts "#{prefix} Current Token: #{get_token(0).inspect}"
-    #puts "#{prefix} Current Stack: #{top.inspect}"
-    #puts "#{prefix} Current Tokens: #{@token_idx} #{@tokens[@token_idx - 1..@token_idx + 1].map(&:last).inspect}"
+    puts "#{prefix} Current Token: #{get_token(0).inspect}"
+    puts "#{prefix} Current Stack: #{top.inspect}"
+    puts "#{prefix} Current Tokens: #{@token_idx} #{@tokens[@token_idx - 1..@token_idx + 1].map(&:last).inspect}"
   end
 
   def compile_return
