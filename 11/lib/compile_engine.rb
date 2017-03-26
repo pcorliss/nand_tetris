@@ -41,25 +41,19 @@ class CompileEngine
   end
 
   def process!
-    #while @token_idx < @tokens.length
-      #type, token = @tokens[@token_idx]
-      #if type == 'keyword' && KEYWORD_LOOKUP[token]
-        #self.send(KEYWORD_LOOKUP[token])
-      #elsif type == 'symbol' && CLOSING_SYMBOLS.include?(token)
-        #if in_statement?
-          #@pops << @stack.pop
-          #@statement = false
-        #end
-        #top.add_element(type).text = token
-        #@pops << @stack.pop
+    compile
+  end
 
-        #if @pops.last.name == 'subroutineBody'
-          #@pops << @stack.pop
-          #@subroutine = false
-        #end
-      #end
-      #@token_idx += 1
-    #end
+  def compile
+    while @token_idx < @tokens.length
+      type, token = @tokens[@token_idx]
+      if type == 'keyword' && KEYWORD_LOOKUP[token]
+        #self.send(KEYWORD_LOOKUP[token])
+      else
+        #raise RuntimeError, "Unregcognized token"
+      end
+      @token_idx += 1
+    end
   end
 
   def get_token(i)
@@ -67,27 +61,27 @@ class CompileEngine
   end
 
   def compile_class
-    c = top.add_element('class')
-    @stack << c
-    top.add_element('keyword').text = 'class'
-    top.add_element('identifier').text = get_token(1).last
-    top.add_element('symbol').text = '{'
-    @token_idx += 2
+    #c = top.add_element('class')
+    #@stack << c
+    #top.add_element('keyword').text = 'class'
+    #top.add_element('identifier').text = get_token(1).last
+    #top.add_element('symbol').text = '{'
+    #@token_idx += 2
   end
 
   def compile_class_var
-    c = top.add_element('classVarDec')
-    @stack << c
-    last_token = nil
-    i = 0
-    while(last_token != ';')
-      type, token = get_token(i)
-      top.add_element(type).text = token
-      i += 1
-      last_token = token
-    end
-    @token_idx += i - 1
-    @stack.pop
+    #c = top.add_element('classVarDec')
+    #@stack << c
+    #last_token = nil
+    #i = 0
+    #while(last_token != ';')
+      #type, token = get_token(i)
+      #top.add_element(type).text = token
+      #i += 1
+      #last_token = token
+    #end
+    #@token_idx += i - 1
+    #@stack.pop
   end
 
   def compile_subroutine
@@ -304,5 +298,6 @@ class CompileEngine
   end
 
   def to_s(options = {})
+    ''
   end
 end

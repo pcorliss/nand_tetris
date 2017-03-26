@@ -1,9 +1,51 @@
 require './lib/compile_engine.rb'
 require './lib/tokenizer.rb'
 require 'pry'
+#require 'tempfile'
+require 'digest'
 
 describe CompileEngine do
+  def expected(input)
+    md5 = Digest::MD5.hexdigest input
+    jack_dir = "spec/fixtures/cache/#{md5}"
+    jack_file = "#{jack_dir}/Foo.jack"
+    vm_file = "#{jack_dir}/Foo.vm"
+    Dir.mkdir(jack_dir) unless Dir.exist?(jack_dir)
+    File.write(jack_file, input) unless File.exist?(jack_file)
+    `JackCompiler.sh #{jack_file}` unless File.exist?(vm_file)
+    # could throw an error here if it fails to compile
+    File.read(vm_file)
+  end
+
+  let(:input) { '' }
+  let(:output) do
+    eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types)
+    eng.process!
+    eng.to_s
+  end
+
   describe "#compile_class" do
+    it "compiles an empty class" do
+      input = <<-EOF
+        class Foo { }
+      EOF
+
+      # empty out
+      expect(output).to eq(expected(input))
+    end
+
+    it "prefixes function definitions" do
+      input = <<-EOF
+        class Foo {
+          function void main() {
+            return;
+          }
+        }
+      EOF
+
+      expect(output).to include('function Foo.main 0')
+      expect(output).to eq(expected(input))
+    end
   end
 
   describe "#compile_class_var" do
