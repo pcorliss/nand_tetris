@@ -17,24 +17,26 @@ describe CompileEngine do
     File.read(vm_file)
   end
 
-  let(:input) { '' }
-  let(:output) do
-    eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types)
+  def get_eng(input)
+    tokenizer = Tokenizer.new(StringIO.new(input))
+    eng = CompileEngine.new(tokenizer.types)
     eng.process!
-    eng.to_s
+    eng
   end
 
   describe "#compile_class" do
     it "compiles an empty class" do
       input = <<-EOF
-        class Foo { }
+        class Foo {}
       EOF
 
       # empty out
-      expect(output).to eq(expected(input))
+      eng = get_eng(input)
+      expect(eng.class_name).to eq('Foo')
+      expect(eng.to_s).to eq(expected(input))
     end
 
-    it "prefixes function definitions" do
+    xit "prefixes function definitions" do
       input = <<-EOF
         class Foo {
           function void main() {
@@ -43,12 +45,27 @@ describe CompileEngine do
         }
       EOF
 
-      expect(output).to include('function Foo.main 0')
-      expect(output).to eq(expected(input))
+      expect(output(input)).to include('function Foo.main 0')
+      expect(output(input)).to eq(expected(input))
     end
   end
 
   describe "#compile_class_var" do
+    it "compiles an empty class" do
+      input = <<-EOF
+        class Foo {
+          static int x, y;
+          field int z;
+        }
+      EOF
+
+      # empty out
+      eng = get_eng(input)
+      expect(eng.class_symbols.get('x').to_a).to eq(['x', 'int', 'STATIC', 0])
+      expect(eng.class_symbols.get('y').to_a).to eq(['y', 'int', 'STATIC', 1])
+      expect(eng.class_symbols.get('z').to_a).to eq(['z', 'int', 'FIELD', 0])
+      expect(eng.to_s).to eq(expected(input))
+    end
   end
 
   describe "#compile_subroutine" do
@@ -60,8 +77,7 @@ describe CompileEngine do
   describe "compile statements" do
   end
 
-  it "handles if/else statements" do
-  end
+  it "handles if/else statements"
 
   describe "samples" do
     def strip(str)

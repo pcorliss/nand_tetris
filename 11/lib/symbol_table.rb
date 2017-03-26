@@ -11,6 +11,7 @@ class SymbolTable
   end
 
   def set(name, type, kind)
+    kind = kind.upcase
     raise(RuntimeError, "Invalid kind: #{kind}") unless VALID_KINDS.include? kind
     @symbols[name] = Symbol.new(name, type, kind, @kind_counts[kind])
     @kind_counts[kind] += 1
