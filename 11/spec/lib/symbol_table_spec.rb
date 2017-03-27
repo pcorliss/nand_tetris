@@ -51,4 +51,13 @@ describe SymbolTable do
       expect(st.exists?('fake')).to be_falsey
     end
   end
+
+  describe "#count" do
+    it "returns the number of values of the specified kind" do
+      st.set('varname', 'int', 'ARG')
+      st.set('varname2', 'int', 'ARG')
+      st.set('varname3', 'int', 'VAR')
+      expect(st.count('ARG')).to eq(2)
+    end
+  end
 end

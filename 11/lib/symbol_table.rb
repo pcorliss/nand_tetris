@@ -24,4 +24,8 @@ class SymbolTable
   def exists?(name)
     @symbols.has_key? name
   end
+
+  def count(kind)
+    @kind_counts[kind.upcase]
+  end
 end
