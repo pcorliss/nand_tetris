@@ -134,17 +134,48 @@ describe CompileEngine do
         expect(eng.to_s).to eq(expected(input))
       end
 
-      #it "handles returning a constant"
-      #it "handles returning an expression"
+      it "handles returning a constant"
+      it "handles returning an expression"
     end
-    #describe "#compile_var_dec" do
-      #it "outputs the count of var decs"
-      #it "defines local vars"
-    #end
-    #describe "if/else statements"
-    #describe "let statements"
-    #describe "do statements"
-    #describe "while statements"
+    describe "#compile_var_dec" do
+      it "outputs the count of var decs" do
+        input = <<-EOF
+          class Foo {
+            function void main() {
+              var int x, y;
+              var String z;
+              return;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to include('function Foo.main 3')
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "defines local vars" do
+        input = <<-EOF
+          class Foo {
+            function void main() {
+              var int x, y;
+              var String z;
+              return;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.sub_symbols.get('x').to_a).to eq(['x', 'int', 'VAR', 0])
+        expect(eng.sub_symbols.get('y').to_a).to eq(['y', 'int', 'VAR', 1])
+        expect(eng.sub_symbols.get('z').to_a).to eq(['z', 'String', 'VAR', 2])
+        expect(eng.to_s).to eq(expected(input))
+      end
+    end
+    describe "let statements"
+    describe "do statements"
+    describe "if/else statements"
+    describe "while statements"
   end
 
 

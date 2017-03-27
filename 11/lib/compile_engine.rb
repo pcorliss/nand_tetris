@@ -45,8 +45,9 @@ class CompileEngine
 
   def initialize(tokens)
     @tokens = tokens
-    @out = ''
+    @lines = []
     @class_symbols = SymbolTable.new
+    @var_count = {}
   end
 
   def process!
@@ -82,7 +83,7 @@ class CompileEngine
     puts "#{prefix} Tokens: #{get_token(i-1)} #{get_token(i)} #{get_token(i+1)}"
   end
 
-  def compile_class_var(idx)
+  def compile_var(idx, symbol_table)
     i = idx
     _, var_kind = get_token(i)
     i += 1
@@ -90,10 +91,14 @@ class CompileEngine
     i += 1
     while(get_token(i).last != ';') do
       _, token = get_token(i)
-      class_symbols.set(token, var_type, var_kind) if(token != ',')
+      symbol_table.set(token, var_type, var_kind) if(token != ',')
       i += 1
     end
     i
+  end
+
+  def compile_class_var(idx)
+    compile_var(idx, class_symbols)
   end
 
   # function void main() {}
@@ -125,9 +130,8 @@ class CompileEngine
       @sub_symbols.set(arg_name, arg_type, 'arg')
     end
 
-    # Need to look ahead for var dec
-    # Could do something fancy with blocks
-    write "function #{class_name}.#{function_name} 0"
+    # Need to look ahead for var dec, using a block set at output time
+    write(lambda { "function #{class_name}.#{function_name} #{@var_count[function_name]}" })
     if @sub_type == 'method'
       write "push argument 0"
       write "pop pointer 0"
@@ -135,13 +139,16 @@ class CompileEngine
 
     #put_status(i, "compile_class #{@class_name}: ")
     i = evaluate_until('}', SUB_LOOKUP, i) # class blah {
+
+    @var_count[function_name] = @sub_symbols.count('var')
     i
   end
 
   def compile_parameter_list
   end
 
-  def compile_var_dec
+  def compile_var_dec(idx)
+    compile_var(idx, sub_symbols)
   end
 
   def compile_do
@@ -176,11 +183,17 @@ class CompileEngine
   def compile_else
   end
 
-  def write(str)
-    @out << str + "\n"
+  def write(element)
+    @lines << element
   end
 
   def to_s(options = {})
-    @out
+    out = @lines.map do |line|
+      str = line
+      str = line.call if line.is_a? Proc
+      str
+    end.join("\n")
+    out << "\n" unless out.empty?
+    out
   end
 end
