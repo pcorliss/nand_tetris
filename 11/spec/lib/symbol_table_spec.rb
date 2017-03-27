@@ -59,5 +59,12 @@ describe SymbolTable do
       st.set('varname3', 'int', 'VAR')
       expect(st.count('ARG')).to eq(2)
     end
+
+    it "returns the total number of values" do
+      st.set('varname', 'int', 'ARG')
+      st.set('varname2', 'int', 'ARG')
+      st.set('varname3', 'int', 'VAR')
+      expect(st.count).to eq(3)
+    end
   end
 end

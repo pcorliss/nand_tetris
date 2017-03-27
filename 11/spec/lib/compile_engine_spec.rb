@@ -72,11 +72,52 @@ describe CompileEngine do
       expect(eng.to_s).to eq(expected(input))
     end
 
-    #it "defines no arguments"
-    #it "defines multiple arguments"
-    #it "defines arg 0 if it is a method"
-    #it "replaces local variables"
-    #it "replaces class variables"
+    it "defines no arguments" do
+      input = <<-EOF
+        class Foo {
+          function void main() {
+            return;
+          }
+        }
+      EOF
+
+      eng = get_eng(input)
+      expect(eng.sub_symbols.count).to eq(0)
+      expect(eng.to_s).to eq(expected(input))
+    end
+
+    it "defines multiple arguments" do
+      input = <<-EOF
+        class Foo {
+          function void main(int x, int y) {
+            return;
+          }
+        }
+      EOF
+
+      eng = get_eng(input)
+      expect(eng.sub_symbols.count).to eq(2)
+      expect(eng.sub_symbols.count('arg')).to eq(2)
+      expect(eng.to_s).to eq(expected(input))
+    end
+
+    it "defines arg 0 if it is a method" do
+      input = <<-EOF
+        class Foo {
+          method void main(int x, int y) {
+            return;
+          }
+        }
+      EOF
+
+      eng = get_eng(input)
+      expect(eng.sub_symbols.count).to eq(3)
+      expect(eng.sub_symbols.count('arg')).to eq(3)
+      expect(eng.sub_symbols.get('this').to_a).to eq(['this', 'Foo', 'ARG', 0])
+      expect(eng.to_s).to include('push argument 0', 'pop pointer 0')
+      expect(eng.to_s).to eq(expected(input))
+    end
+
     describe "return" do
       it "handles an empty return" do
         input = <<-EOF
@@ -98,6 +139,7 @@ describe CompileEngine do
     end
     #describe "#compile_var_dec" do
       #it "outputs the count of var decs"
+      #it "defines local vars"
     #end
     #describe "if/else statements"
     #describe "let statements"

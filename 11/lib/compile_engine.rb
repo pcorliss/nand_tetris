@@ -112,7 +112,8 @@ class CompileEngine
     i += 1
 
 
-    # if method add ....
+    @sub_symbols.set('this', @class_name, 'arg') if @sub_type == 'method'
+
     while(get_token(i).last != ')') do
       i += 1 if get_token(i).last == ','
 
@@ -124,7 +125,13 @@ class CompileEngine
       @sub_symbols.set(arg_name, arg_type, 'arg')
     end
 
+    # Need to look ahead for var dec
+    # Could do something fancy with blocks
     write "function #{class_name}.#{function_name} 0"
+    if @sub_type == 'method'
+      write "push argument 0"
+      write "pop pointer 0"
+    end
 
     #put_status(i, "compile_class #{@class_name}: ")
     i = evaluate_until('}', SUB_LOOKUP, i) # class blah {

@@ -25,7 +25,10 @@ class SymbolTable
     @symbols.has_key? name
   end
 
-  def count(kind)
+  def count(kind = 'all')
+    if kind == 'all'
+      return @symbols.count
+    end
     @kind_counts[kind.upcase]
   end
 end
