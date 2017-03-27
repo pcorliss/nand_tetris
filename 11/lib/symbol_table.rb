@@ -1,8 +1,18 @@
 require 'set'
 
 class SymbolTable
-  Symbol = Struct.new(:name, :type, :kind, :offset)
+  Symbol = Struct.new(:name, :type, :kind, :offset) do
+    def write_symbol
+      "#{KIND_LOOKUP[kind]} #{offset}"
+    end
+  end
 
+  KIND_LOOKUP = {
+    'ARG' => 'argument',
+    'STATIC' => 'static',
+    'FIELD' => 'this',
+    'VAR' => 'local',
+  }
   VALID_KINDS = Set.new(['ARG', 'STATIC', 'FIELD', 'VAR'])
 
   def initialize

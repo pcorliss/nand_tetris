@@ -39,6 +39,21 @@ UNARY = ['-', '~']
 OP_UNARY = OP + UNARY
 OP_UNARY_PARAN = OP_UNARY + ['(', ')', ',']
 CLOSING_SYMBOLS = ['}']
+EXPR_SYMBOLS = [
+  ['(', ')'],
+  ['[', ']'],
+]
+OP_LOOKUP = {
+  '+' => 'add',
+  '-' => 'sub',
+  '*' => 'call Math.multiply 2',
+  '/' => 'call Math.divide 2',
+  '&' => 'and',
+  '|' => 'or',
+  '<' => 'lt',
+  '>' => 'gt',
+  '=' => 'eq',
+}
 
 class CompileEngine
   attr_reader :tokens, :class_name, :class_symbols, :sub_symbols, :function_name, :return_type
@@ -160,17 +175,48 @@ class CompileEngine
   def compile_let
   end
 
-  def compile_expression(idx,stop_token)
+  def lookup_symbol(var)
+    sub_symbols.get(var) || class_symbols.get(var)
+  end
+
+  def write_element(element)
+    if element.first == 'integerConstant'
+      "constant #{element.last}"
+    else
+      lookup_symbol(element.last).write_symbol
+    end
+  end
+
+  def compile_expression(idx, end_token)
+    i = idx
+    elements = []
+    while(get_token(i).last != end_token) do
+      elements << get_token(i)
+      i += 1
+    end
+
+    if elements.length == 1
+      write "push #{write_element(elements[0])}"
+    elsif elements.length == 3
+      write "push #{write_element(elements[0])}"
+      write "push #{write_element(elements[2])}"
+      write "#{OP_LOOKUP[elements[1].last]}"
+    end
+
+    i
   end
 
   def compile_return(idx)
     i = idx
     #_, _ = get_token(i) # return
     i += 1
-    # handle expression
-    #_, _ = get_token(i) # ;
-    write "push constant 0"
+    if get_token(i).last == ';'
+      write "push constant 0"
+    else
+      i = compile_expression(i, ';')
+    end
     write "return"
+    #_, _ = get_token(i) # ;
     i += 1
   end
 

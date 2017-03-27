@@ -133,10 +133,220 @@ describe CompileEngine do
         expect(eng.to_s).to include('return')
         expect(eng.to_s).to eq(expected(input))
       end
-
-      it "handles returning a constant"
-      it "handles returning an expression"
     end
+
+    describe "expressions" do
+      it "handles constant expression" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              return 1;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to include('push constant 1')
+        expect(eng.to_s).to include('return')
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles basic addition expression" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              return 1 + 2;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to include('push constant 1')
+        expect(eng.to_s).to include('push constant 2')
+        expect(eng.to_s).to include('add')
+        expect(eng.to_s).to include('return')
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles lookups of args" do
+        input = <<-EOF
+          class Foo {
+            function int main(int x) {
+              return x;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to include('push argument 0')
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles lookups of fields/this" do
+        input = <<-EOF
+          class Foo {
+            field int x;
+
+            method int main() {
+              return x;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to include('push this 0')
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles lookups of statics" do
+        input = <<-EOF
+          class Foo {
+            static int x;
+
+            function int main() {
+              return x;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to include('push static 0')
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles lookups of vars" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              var int x;
+              return x;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to include('push local 0')
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles basic subtraction expression" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              return 1 - 2;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to include('sub')
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles basic multiplication expression" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              return 1 * 2;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to include('call Math.multiply 2')
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles basic division expression" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              return 1 / 2;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to include('call Math.divide 2')
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      #it "handles negative expression"
+      #it "handles unary expression"
+      it "handles and expression" do
+        input = <<-EOF
+          class Foo {
+            function boolean main() {
+              return 1 & 2;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to include('and')
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles or expression" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              return 1 | 2;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to include('or')
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles less than expression" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              return 1 < 2;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to include('lt')
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles greater than expression" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              return 1 > 2;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to include('gt')
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles equality expression" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              return 1 = 2;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to include('eq')
+        expect(eng.to_s).to eq(expected(input))
+      end
+      #it "handles nested paran expression"
+      #it "handles array access expression"
+      #it "handles nested array access expression"
+    end
+
     describe "#compile_var_dec" do
       it "outputs the count of var decs" do
         input = <<-EOF
@@ -172,10 +382,12 @@ describe CompileEngine do
         expect(eng.to_s).to eq(expected(input))
       end
     end
+
     describe "let statements"
     describe "do statements"
     describe "if/else statements"
     describe "while statements"
+    describe "array access"
   end
 
 
