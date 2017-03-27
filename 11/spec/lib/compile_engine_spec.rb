@@ -147,7 +147,6 @@ describe CompileEngine do
 
         eng = get_eng(input)
         expect(eng.to_s).to include('push constant 1')
-        expect(eng.to_s).to include('return')
         expect(eng.to_s).to eq(expected(input))
       end
 
@@ -164,7 +163,6 @@ describe CompileEngine do
         expect(eng.to_s).to include('push constant 1')
         expect(eng.to_s).to include('push constant 2')
         expect(eng.to_s).to include('add')
-        expect(eng.to_s).to include('return')
         expect(eng.to_s).to eq(expected(input))
       end
 
@@ -229,6 +227,61 @@ describe CompileEngine do
         expect(eng.to_s).to eq(expected(input))
       end
 
+      it "handles boolean true" do
+        input = <<-EOF
+          class Foo {
+            function boolean main() {
+              return true;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        #expect(eng.to_s).to include('push local 0')
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles boolean false" do
+        input = <<-EOF
+          class Foo {
+            function boolean main() {
+              return false;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        #expect(eng.to_s).to include('push local 0')
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles this" do
+        input = <<-EOF
+          class Foo {
+            method Foo main() {
+              return this;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        #expect(eng.to_s).to include('push local 0')
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles null" do
+        input = <<-EOF
+          class Foo {
+            function boolean main() {
+              return null;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        #expect(eng.to_s).to include('push local 0')
+        expect(eng.to_s).to eq(expected(input))
+      end
       it "handles basic subtraction expression" do
         input = <<-EOF
           class Foo {
@@ -271,8 +324,34 @@ describe CompileEngine do
         expect(eng.to_s).to eq(expected(input))
       end
 
-      #it "handles negative expression"
-      #it "handles unary expression"
+      it "handles negative expression" do
+        input = <<-EOF
+          class Foo {
+            function boolean main() {
+              return - 2;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to include('neg')
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles negation expression" do
+        input = <<-EOF
+          class Foo {
+            function boolean main() {
+              return ~ 2;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to include('not')
+        expect(eng.to_s).to eq(expected(input))
+      end
+
       it "handles and expression" do
         input = <<-EOF
           class Foo {

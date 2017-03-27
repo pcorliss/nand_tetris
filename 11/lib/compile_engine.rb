@@ -43,6 +43,7 @@ EXPR_SYMBOLS = [
   ['(', ')'],
   ['[', ']'],
 ]
+
 OP_LOOKUP = {
   '+' => 'add',
   '-' => 'sub',
@@ -53,6 +54,11 @@ OP_LOOKUP = {
   '<' => 'lt',
   '>' => 'gt',
   '=' => 'eq',
+}
+
+UNARY_OP_LOOKUP = {
+  '~' => 'not',
+  '-' => 'neg',
 }
 
 class CompileEngine
@@ -182,6 +188,8 @@ class CompileEngine
   def write_element(element)
     if element.first == 'integerConstant'
       "constant #{element.last}"
+    elsif element.first == 'keyword'
+      'foo bar'
     else
       lookup_symbol(element.last).write_symbol
     end
@@ -201,6 +209,9 @@ class CompileEngine
       write "push #{write_element(elements[0])}"
       write "push #{write_element(elements[2])}"
       write "#{OP_LOOKUP[elements[1].last]}"
+    elsif elements.length == 2
+      write "push #{write_element(elements[1])}"
+      write "#{UNARY_OP_LOOKUP[elements[0].last]}"
     end
 
     i
