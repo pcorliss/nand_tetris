@@ -193,6 +193,10 @@ class CompileEngine
   end
 
   def write_element(action, element)
+    if !is_token?(element)
+      write_expression(element)
+      return
+    end
     out = action + " "
     type, token = element
     if type == 'integerConstant'
@@ -202,7 +206,7 @@ class CompileEngine
     else
       out << lookup_symbol(token).write_symbol
     end
-    out
+    write out
   end
 
   def compress(elements)
@@ -234,15 +238,17 @@ class CompileEngine
 
   def write_expression(elements)
     #puts "Write: #{elements.inspect}"
+    #pp elements
     elements = [elements] if is_token?(elements)
     if elements.length == 1 || is_token?(elements)
-      write write_element('push', elements[0])
+      write_element('push', elements[0])
     elsif elements.length == 3
-      write write_element('push', elements[0])
-      write write_element('push', elements[2])
+      #puts "THREE"
+      write_element('push', elements[0])
+      write_element('push', elements[2])
       write "#{OP_LOOKUP[elements[1].last]}"
     elsif elements.length == 2
-      write write_element('push', elements[1])
+      write_element('push', elements[1])
       write "#{UNARY_OP_LOOKUP[elements[0].last]}"
     end
   end

@@ -447,6 +447,19 @@ describe CompileEngine do
         eng = get_eng(input)
         expect(eng.to_s).to eq(expected(input))
       end
+
+      it "handles more complex nested expression" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              return (1+2)-(3*(4/5));
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
       #it "handles function call expression"
 
       #it "handles nested paran expression"
