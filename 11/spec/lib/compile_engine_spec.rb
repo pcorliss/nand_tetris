@@ -422,6 +422,31 @@ describe CompileEngine do
         expect(eng.to_s).to eq(expected(input))
       end
 
+      it "handles simple nested constant" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              return (((((1)))));
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles simple nested expression" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              return ((((1)+(2))));
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
       #it "handles function call expression"
 
       #it "handles nested paran expression"

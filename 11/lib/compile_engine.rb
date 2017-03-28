@@ -205,40 +205,37 @@ class CompileEngine
     out
   end
 
-  # 0 - constant/stringConstant
-  # x - term
-  # ~x - symbol, term
-  # -x - symbol, term
-  # x + y - term, symbol, term
-  # x + (y + z)
-  # (x + y) + (w + z)
-  # a[i]
-  # a[b[j]]
-  # a[x + y]
-  # Foo.bar(a, b, c)
-  # Foo.bar(x + y)
+  def compress(elements)
+    elements.length == 1 ? elements.first : elements
+  end
+
+  def is_token?(inp)
+    inp.is_a?(Array) && inp.length == 2 && inp.all? { |el| el.is_a?(String) }
+  end
+
   def gather_expressions(idx, end_token)
     i = idx
     elements = []
     while(get_token(i).last != end_token) do
       if get_token(i).last == '('
-        i, e = gather_expressions(i, ')')
+        i, e = gather_expressions(i + 1, ')')
         elements << e
       elsif get_token(i).last == '['
-        i, e = gather_expressions(i, ']')
+        i, e = gather_expressions(i + 1, ']')
         elements << e
       else
         elements << get_token(i)
-        i += 1
       end
+      i += 1
     end
-    # what about nested elements in parans?
-    # elements.map do {|e| e.is_a?(Array) && e.length == 1 ? e.first : e}
-    [i, elements]
+
+    [i, compress(elements)]
   end
 
   def write_expression(elements)
-    if elements.length == 1
+    #puts "Write: #{elements.inspect}"
+    elements = [elements] if is_token?(elements)
+    if elements.length == 1 || is_token?(elements)
       write write_element('push', elements[0])
     elsif elements.length == 3
       write write_element('push', elements[0])
@@ -257,6 +254,7 @@ class CompileEngine
     #  then we can handle the if conditionsla
     #  then evaluate with code_write/evaluate
     i, elements = gather_expressions(idx, end_token)
+
     write_expression(elements)
 
     i
