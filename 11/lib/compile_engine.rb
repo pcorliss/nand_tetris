@@ -205,20 +205,39 @@ class CompileEngine
     out
   end
 
-  def compile_expression(idx, end_token)
-    #  This is a shitty comment
-    #  red until end token
-    #  if open expression call recursive
-    #  should have arrays of arrays
-    #  then we can handle the if conditionsla
-    #  then evaluate with code_write/evaluate
+  # 0 - constant/stringConstant
+  # x - term
+  # ~x - symbol, term
+  # -x - symbol, term
+  # x + y - term, symbol, term
+  # x + (y + z)
+  # (x + y) + (w + z)
+  # a[i]
+  # a[b[j]]
+  # a[x + y]
+  # Foo.bar(a, b, c)
+  # Foo.bar(x + y)
+  def gather_expressions(idx, end_token)
     i = idx
     elements = []
     while(get_token(i).last != end_token) do
-      elements << get_token(i)
-      i += 1
+      if get_token(i).last == '('
+        i, e = gather_expressions(i, ')')
+        elements << e
+      elsif get_token(i).last == '['
+        i, e = gather_expressions(i, ']')
+        elements << e
+      else
+        elements << get_token(i)
+        i += 1
+      end
     end
+    # what about nested elements in parans?
+    # elements.map do {|e| e.is_a?(Array) && e.length == 1 ? e.first : e}
+    [i, elements]
+  end
 
+  def write_expression(elements)
     if elements.length == 1
       write write_element('push', elements[0])
     elsif elements.length == 3
@@ -229,6 +248,16 @@ class CompileEngine
       write write_element('push', elements[1])
       write "#{UNARY_OP_LOOKUP[elements[0].last]}"
     end
+  end
+
+  def compile_expression(idx, end_token)
+    #  read until end token
+    #  if open expression call recursive
+    #  should have arrays of arrays
+    #  then we can handle the if conditionsla
+    #  then evaluate with code_write/evaluate
+    i, elements = gather_expressions(idx, end_token)
+    write_expression(elements)
 
     i
   end

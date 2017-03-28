@@ -423,7 +423,7 @@ describe CompileEngine do
       end
 
       #it "handles function call expression"
-      #
+
       #it "handles nested paran expression"
       #it "handles array access expression"
       #it "handles nested array access expression"
@@ -465,11 +465,13 @@ describe CompileEngine do
       end
     end
 
-    describe "let statements"
+    describe "let statements" do
+      #it "allows setting an array element"
+      #it "allows setting a nested array element"
+    end
     describe "do statements"
     describe "if/else statements"
     describe "while statements"
-    describe "array access"
   end
 
 
