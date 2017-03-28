@@ -61,6 +61,13 @@ UNARY_OP_LOOKUP = {
   '-' => 'neg',
 }
 
+CONST_LOOKUP = {
+  'true' => "constant 0\nnot",
+  'false' => 'constant 0',
+  'null' => 'constant 0',
+  'this' => 'pointer 0',
+}
+
 class CompileEngine
   attr_reader :tokens, :class_name, :class_symbols, :sub_symbols, :function_name, :return_type
 
@@ -185,17 +192,26 @@ class CompileEngine
     sub_symbols.get(var) || class_symbols.get(var)
   end
 
-  def write_element(element)
-    if element.first == 'integerConstant'
-      "constant #{element.last}"
-    elsif element.first == 'keyword'
-      'foo bar'
+  def write_element(action, element)
+    out = action + " "
+    type, token = element
+    if type == 'integerConstant'
+      out << "constant #{token}"
+    elsif type == 'keyword'
+      out << CONST_LOOKUP[token]
     else
-      lookup_symbol(element.last).write_symbol
+      out << lookup_symbol(token).write_symbol
     end
+    out
   end
 
   def compile_expression(idx, end_token)
+    #  This is a shitty comment
+    #  red until end token
+    #  if open expression call recursive
+    #  should have arrays of arrays
+    #  then we can handle the if conditionsla
+    #  then evaluate with code_write/evaluate
     i = idx
     elements = []
     while(get_token(i).last != end_token) do
@@ -204,13 +220,13 @@ class CompileEngine
     end
 
     if elements.length == 1
-      write "push #{write_element(elements[0])}"
+      write write_element('push', elements[0])
     elsif elements.length == 3
-      write "push #{write_element(elements[0])}"
-      write "push #{write_element(elements[2])}"
+      write write_element('push', elements[0])
+      write write_element('push', elements[2])
       write "#{OP_LOOKUP[elements[1].last]}"
     elsif elements.length == 2
-      write "push #{write_element(elements[1])}"
+      write write_element('push', elements[1])
       write "#{UNARY_OP_LOOKUP[elements[0].last]}"
     end
 

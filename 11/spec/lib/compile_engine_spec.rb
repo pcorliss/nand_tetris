@@ -421,6 +421,9 @@ describe CompileEngine do
         expect(eng.to_s).to include('eq')
         expect(eng.to_s).to eq(expected(input))
       end
+
+      #it "handles function call expression"
+      #
       #it "handles nested paran expression"
       #it "handles array access expression"
       #it "handles nested array access expression"
