@@ -543,35 +543,64 @@ describe CompileEngine do
         end
       end
 
-      xit "handles array access expression" do
-        input = <<-EOF
-          class Foo {
-            function int main() {
-              var Array a;
-              return a[7];
+      context "array access" do
+        it "handles array access expression" do
+          input = <<-EOF
+            class Foo {
+              function int main() {
+                var Array a;
+                return a[6];
+              }
             }
-          }
-        EOF
+          EOF
 
-        eng = get_eng(input)
-        expect(eng.to_s).to eq(expected(input))
-      end
+          eng = get_eng(input)
+          expect(eng.to_s).to eq(expected(input))
+        end
 
-      xit "handles nested array access expression" do
-        input = <<-EOF
-          class Foo {
-            function int main() {
-              var Array a, b, c, d;
-              return a[b[c[d[7]]]];
+        # a[i] + b[j]
+        it "handles nested array access expression" do
+          input = <<-EOF
+            class Foo {
+              function int main() {
+                var Array a, b, c, d;
+                return a[b[c[d[7]]]];
+              }
             }
-          }
-        EOF
+          EOF
 
-        eng = get_eng(input)
-        expect(eng.to_s).to eq(expected(input))
+          eng = get_eng(input)
+          expect(eng.to_s).to eq(expected(input))
+        end
+
+        it "handles expressions inside array lookups" do
+          input = <<-EOF
+            class Foo {
+              function int main() {
+                var Array a;
+                return a[(1 - 4) + (6 * 7)];
+              }
+            }
+          EOF
+
+          eng = get_eng(input)
+          expect(eng.to_s).to eq(expected(input))
+        end
+
+        it "handles expressions involving arrays" do
+          input = <<-EOF
+            class Foo {
+              function int main() {
+                var Array a, b, c, d;
+                return a[b[7]] + c[d[4]];
+              }
+            }
+          EOF
+
+          eng = get_eng(input)
+          expect(eng.to_s).to eq(expected(input))
+        end
       end
-
-      # it handles a really complex expression array access function call and nesting
     end
 
     describe "#compile_var_dec" do

@@ -245,12 +245,27 @@ class CompileEngine
     write 'call ' + out
   end
 
+  def write_array(element)
+    #puts "ArrayWrite: #{element.inspect}"
+    _, array_symbol, exps = element
+    #puts "ArrayWrite: #{element.inspect} #{array_symbol.inspect} #{exps.inspect}"
+    write_expression(exps)
+    write "push #{lookup_symbol(array_symbol.last).write_symbol}"
+    write 'add'
+    write 'pop pointer 1'
+    write 'push that 0'
+  end
+
   def write_element(action, element)
+    #puts "E: #{element}"
     if element.first == 'function'
       write_function(element)
       return
     end
-
+    if element.first == 'array'
+      write_array(element)
+      return
+    end
     if !is_token?(element)
       write_expression(element)
       return
@@ -308,6 +323,9 @@ class CompileEngine
         end
       elsif get_token(i).last == '['
         i, e = gather_expressions(i + 1, ']')
+        e = [[e]] #if is_token?(e)
+        e.unshift(elements.pop)
+        e.unshift('array')
         elements << e
       else
         elements << get_token(i)
@@ -322,8 +340,9 @@ class CompileEngine
     #puts "Write: #{elements.inspect}"
     elements = [elements] if is_token?(elements)
     #pp elements
-    if elements.first == 'function'
+    if elements.first == 'function' || elements.first == 'array'
       write_element('push', elements)
+    #elsif elements.first == 'array'
     elsif elements.length == 1
       write_element('push', elements[0])
     elsif elements.length == 3
