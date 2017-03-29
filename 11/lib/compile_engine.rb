@@ -86,8 +86,11 @@ class CompileEngine
     i = idx
     type, token = get_token(i)
     while(token != end_token) do
+      #put_status(i, "working until (#{end_token}):")
       if type == 'keyword' && keywords[token]
+        #put_status(i, "Calling #{i}: #{keywords[token]}")
         i = self.send(keywords[token], i) - 1
+        #put_status(i, "Done Calling #{i}: #{keywords[token]}")
       end
       i += 1
       type, token = get_token(i)
@@ -159,7 +162,8 @@ class CompileEngine
     end
 
     # Need to look ahead for var dec, using a block set at output time
-    write(lambda { "function #{class_name}.#{function_name} #{@var_count[function_name]}" })
+    func = function_name # we can't use the class instance var here because it will get eaten
+    write(lambda { "function #{class_name}.#{func} #{@var_count[func]}" })
     if @sub_type == 'method'
       write "push argument 0"
       write "pop pointer 0"
@@ -169,7 +173,7 @@ class CompileEngine
     i = evaluate_until('}', SUB_LOOKUP, i) # class blah {
 
     @var_count[function_name] = @sub_symbols.count('var')
-    i
+    i + 1
   end
 
   def compile_parameter_list
@@ -192,7 +196,27 @@ class CompileEngine
     sub_symbols.get(var) || class_symbols.get(var)
   end
 
+  def write_function(element)
+    puts "Function: #{element}"
+    out = 'call '
+    element.each do |e|
+      next if e == 'function'
+      if is_token?(e)
+        out << e.last
+      else
+        out << " #{e.length}"
+        break
+      end
+    end
+    write out
+  end
+
   def write_element(action, element)
+    if element.first == 'function'
+      write_function(element)
+      return
+    end
+
     if !is_token?(element)
       write_expression(element)
       return
@@ -210,7 +234,10 @@ class CompileEngine
   end
 
   def compress(elements)
-    elements.length == 1 ? elements.first : elements
+    #puts "Compression: #{elements.inspect}"
+    e = elements.length == 1 && elements.first.first != 'function' ? elements.first : elements
+    #puts "PostCompression: #{e.inspect}"
+    e
   end
 
   def is_token?(inp)
@@ -222,8 +249,27 @@ class CompileEngine
     elements = []
     while(get_token(i).last != end_token) do
       if get_token(i).last == '('
+        # read elements backwards until we find the beginning or OP or UNARY
+        # wrap in brackets
         i, e = gather_expressions(i + 1, ')')
-        elements << e
+        if elements.last && elements.last.first == 'identifier'
+          elements << e
+          expression_elements = []
+          function_elements = []
+          switch = true
+          elements.reverse.each do |el|
+            switch = false  if switch && OP_UNARY.include?(el.last)
+            switch ? function_elements.unshift(el) : expression_elements.unshift(el)
+          end
+          function_elements.unshift('function')
+          puts "fel: #{function_elements.inspect}"
+          puts "eel: #{expression_elements.inspect}"
+          elements = expression_elements
+          elements << function_elements
+          puts "POST: #{elements.inspect}"
+        else
+          elements << e
+        end
       elsif get_token(i).last == '['
         i, e = gather_expressions(i + 1, ']')
         elements << e
@@ -238,9 +284,11 @@ class CompileEngine
 
   def write_expression(elements)
     #puts "Write: #{elements.inspect}"
-    #pp elements
     elements = [elements] if is_token?(elements)
-    if elements.length == 1 || is_token?(elements)
+    pp elements
+    if elements.first == 'function'
+      write_element('push', elements)
+    elsif elements.length == 1
       write_element('push', elements[0])
     elsif elements.length == 3
       #puts "THREE"

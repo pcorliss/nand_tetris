@@ -118,6 +118,22 @@ describe CompileEngine do
       expect(eng.to_s).to eq(expected(input))
     end
 
+    it "handles multiple functions" do
+      input = <<-EOF
+        class Foo {
+          function void main() {
+            return;
+          }
+          function void foo(int x, int y) {
+            return;
+          }
+        }
+      EOF
+
+      eng = get_eng(input)
+      expect(eng.to_s).to eq(expected(input))
+    end
+
     describe "return" do
       it "handles an empty return" do
         input = <<-EOF
@@ -452,7 +468,7 @@ describe CompileEngine do
         input = <<-EOF
           class Foo {
             function int main() {
-              return (1+2)-(3*(4/5));
+              return 0<((1+2)-(3*(4/5)));
             }
           }
         EOF
@@ -460,11 +476,85 @@ describe CompileEngine do
         eng = get_eng(input)
         expect(eng.to_s).to eq(expected(input))
       end
-      #it "handles function call expression"
 
-      #it "handles nested paran expression"
-      #it "handles array access expression"
-      #it "handles nested array access expression"
+      context "function calls" do
+        it "handles function call expression" do
+          input = <<-EOF
+            class Foo {
+              method int main() {
+                return Bar.foo();
+              }
+            }
+          EOF
+
+          eng = get_eng(input)
+          expect(eng.to_s).to eq(expected(input))
+        end
+
+        it "handles method function call expression" do
+          input = <<-EOF
+            class Foo {
+              method int main() {
+                return foo();
+              }
+
+              method int foo() {
+                return 0;
+              }
+            }
+          EOF
+
+          eng = get_eng(input)
+          expect(eng.to_s).to eq(expected(input))
+        end
+
+        xit "handles function call expression with complicated expressions" do
+          input = <<-EOF
+            class Foo {
+              method int main() {
+                return foo(0) + (4 + Bar.foo(1, 2 + 3, (4) * (5 / 6));
+              }
+
+              method int foo(int i) {
+                return i;
+              }
+            }
+          EOF
+
+          eng = get_eng(input)
+          expect(eng.to_s).to eq(expected(input))
+        end
+      end
+
+      xit "handles array access expression" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              var Array a;
+              return a[7];
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      xit "handles nested array access expression" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              var Array a, b, c, d;
+              return a[b[c[d[7]]]];
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      # it handles a really complex expression array access function call and nesting
     end
 
     describe "#compile_var_dec" do
