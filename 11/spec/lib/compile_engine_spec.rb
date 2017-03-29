@@ -643,7 +643,23 @@ describe CompileEngine do
       #it "allows setting an array element"
       #it "allows setting a nested array element"
     end
-    describe "do statements"
+
+    describe "do statements" do
+      it "calls a function with the appropriate args" do
+        input = <<-EOF
+          class Foo {
+            function void main() {
+              do Output.printInt(1 + (2 * 3));
+              return;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
+    end
+
     describe "if/else statements"
     describe "while statements"
   end
@@ -656,40 +672,30 @@ describe CompileEngine do
       # remove trailing new line and left align content
     end
 
-    let(:seven) { 'Seven/Main.vm' }
-    let(:convert) { 'ConvertToBin/Main.vm' }
 
-    let(:square_main) { 'Square/Main.vm' }
-    let(:square_square) { 'Square/Square.vm' }
-    let(:square_game) { 'Square/SquareGame.vm' }
+    {
+      'seven' => 'Seven/Main.vm',
+      #'convert' => 'ConvertToBin/Main.vm',
 
-    let(:avg) { 'Average/Main.vm' }
+      #'square_main' => 'Square/Main.vm',
+      #'square_square' => 'Square/Square.vm',
+      #'square_game' => 'Square/SquareGame.vm',
 
-    let(:pong_ball) { 'Pong/Ball.vm' }
-    let(:pong_bat) { 'Pong/Bat.vm' }
-    let(:pong_main) { 'Pong/Main.vm' }
-    let(:pong_game) { 'Pong/PongGame.vm' }
+      #'avg' => 'Average/Main.vm',
 
-    let(:arrays) { 'ComplexArrays/Main.vm' }
+      #'pong_ball' => 'Pong/Ball.vm',
+      #'pong_bat' => 'Pong/Bat.vm',
+      #'pong_main' => 'Pong/Main.vm',
+      #'pong_game' => 'Pong/PongGame.vm',
 
-    #describe "components" do
-      #xit "handles let statements with function calls" do
-        #expected = <<-EOF
-        #EOF
-        #input = <<-EOF
-        #EOF
-
-        #eng = CompileEngine.new(Tokenizer.new(StringIO.new(input)).types)
-        #eng.process!
-        #expect(eng.to_s).to eq(strip(expected))
-      #end
-    #end
-
-    #xit "has identical output for seven" do
-      #jack_file = seven.sub('.vm', '.jack')
-      #eng = CompileEngine.new(Tokenizer.new(File.open(jack_file)).types)
-      #eng.process!
-      #expect(eng.to_s).to eq(File.read(seven))
-    #end
+      #'arrays' => 'ComplexArrays/Main.vm',
+    }.each do |name, vm_input|
+      it "has identical output for #{name}" do
+        jack_file = vm_input.sub('.vm', '.jack')
+        eng = CompileEngine.new(Tokenizer.new(File.open(jack_file)).types)
+        eng.process!
+        expect(eng.to_s).to eq(File.read(vm_input))
+      end
+    end
   end
 end

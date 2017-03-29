@@ -183,13 +183,22 @@ class CompileEngine
     compile_var(idx, sub_symbols)
   end
 
-  def compile_do
+  def compile_do(idx)
+    i = idx
+    _, _ = get_token(i)  # do
+    i += 1
+    i = compile_expression(i, ';')
+    write "pop temp 0"
+    i
   end
 
   def compile_expression_list
   end
 
-  def compile_let
+  def compile_let(idx)
+    i = idx
+    i += 1
+    i
   end
 
   def lookup_symbol(var)
