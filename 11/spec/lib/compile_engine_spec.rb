@@ -508,15 +508,32 @@ describe CompileEngine do
           expect(eng.to_s).to eq(expected(input))
         end
 
-        xit "handles function call expression with complicated expressions" do
+        it "handles function call expression with multiple arguments" do
           input = <<-EOF
             class Foo {
               method int main() {
-                return foo(0) + (4 + Bar.foo(1, 2 + 3, (4) * (5 / 6));
+                return foo(0, 1) + Foo.bar(2);
               }
 
-              method int foo(int i) {
-                return i;
+              method int foo(int i, int j) {
+                return i + j;
+              }
+            }
+          EOF
+
+          eng = get_eng(input)
+          expect(eng.to_s).to eq(expected(input))
+        end
+
+        it "handles function call expression with complicated expressions" do
+          input = <<-EOF
+            class Foo {
+              method int main() {
+                return foo(0, 1 + 9) + (4 + Bar.foo(1, 2 + 3, (4) * (5 / 6)));
+              }
+
+              method int foo(int i, int j) {
+                return i + j;
               }
             }
           EOF

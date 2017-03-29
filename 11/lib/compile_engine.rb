@@ -197,18 +197,52 @@ class CompileEngine
   end
 
   def write_function(element)
-    puts "Function: #{element}"
-    out = 'call '
+    #puts "Function: #{element}"
+    out = ''
+    method_call = false
+    arg_count = 0
+    args = nil
     element.each do |e|
       next if e == 'function'
       if is_token?(e)
+        if out.empty? && e.last.match(/^[a-z]/)
+          out << class_name
+          out << '.'
+          method_call = true
+          arg_count += 1
+        end
         out << e.last
       else
-        out << " #{e.length}"
+        args = e
         break
       end
     end
-    write out
+
+    if method_call
+      write 'push pointer 0'
+    end
+
+    #puts "Function expressions: #{args.inspect}"
+    counter = 0
+    exps = []
+    args.each do |e|
+      #puts "Element: #{e.inspect} #{e.last} #{e.last == ','}"
+      if e.last == ','
+        #puts "Writing: #{exps.inspect}"
+        write_expression(exps)
+        exps = []
+        counter += 1
+      else
+        exps << e
+        #puts "Added: #{exps.inspect}"
+      end
+    end
+    write_expression(exps)
+    counter += 1 if !exps.empty?
+
+    out << " #{counter + arg_count}"
+
+    write 'call ' + out
   end
 
   def write_element(action, element)
@@ -253,6 +287,7 @@ class CompileEngine
         # wrap in brackets
         i, e = gather_expressions(i + 1, ')')
         if elements.last && elements.last.first == 'identifier'
+          e = [e] if is_token?(e)
           elements << e
           expression_elements = []
           function_elements = []
@@ -262,11 +297,12 @@ class CompileEngine
             switch ? function_elements.unshift(el) : expression_elements.unshift(el)
           end
           function_elements.unshift('function')
-          puts "fel: #{function_elements.inspect}"
-          puts "eel: #{expression_elements.inspect}"
+          #puts "elb: #{e.inspect}"
+          #puts "fel: #{function_elements.inspect}"
+          #puts "eel: #{expression_elements.inspect}"
           elements = expression_elements
           elements << function_elements
-          puts "POST: #{elements.inspect}"
+          #puts "POST: #{elements.inspect}"
         else
           elements << e
         end
@@ -285,7 +321,7 @@ class CompileEngine
   def write_expression(elements)
     #puts "Write: #{elements.inspect}"
     elements = [elements] if is_token?(elements)
-    pp elements
+    #pp elements
     if elements.first == 'function'
       write_element('push', elements)
     elsif elements.length == 1
