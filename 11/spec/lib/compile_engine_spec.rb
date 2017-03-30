@@ -996,7 +996,9 @@ describe CompileEngine do
     }.each do |name, vm_input|
       it "has identical output for #{name}" do
         jack_file = vm_input.sub('.vm', '.jack')
-        eng = CompileEngine.new(Tokenizer.new(File.open(jack_file)).types)
+        t = Tokenizer.new(File.open(jack_file))
+        t.strip!
+        eng = CompileEngine.new(t.types)
         eng.process!
         expect(eng.to_s).to eq(File.read(vm_input))
       end
