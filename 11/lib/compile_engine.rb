@@ -168,7 +168,7 @@ class CompileEngine
     write(lambda { "function #{class_name}.#{func} #{@var_count[func]}" })
 
     if @sub_type == 'constructor'
-      write "push constant #{@class_symbols.count}"
+      write "push constant #{@class_symbols.count('field')}"
       write "call Memory.alloc 1"
       write "pop pointer 0"
     end
@@ -240,10 +240,20 @@ class CompileEngine
     method_call = false
     arg_count = 0
     args = nil
+    #puts "WFunc: #{element.inspect}"
+    sym = nil
+    seen_class = false
     element.each do |e|
       next if e == 'function'
       if is_token?(e)
-        if out.empty? && e.last.match(/^[a-z]/)
+        if !seen_class && lookup_symbol(e.last)
+          sym = lookup_symbol(e.last)
+          e = ["identifier", lookup_symbol(e.last).type]
+          arg_count += 1
+        else
+          seen_class = true
+        end
+        if out.empty? && e.last.match(/^[a-z]/) #&& !lookup_symbol(e.last)
           out << class_name
           out << '.'
           method_call = true
@@ -256,6 +266,9 @@ class CompileEngine
       end
     end
 
+    if sym
+      write "push #{sym.write_symbol}"
+    end
     if method_call
       write 'push pointer 0'
     end

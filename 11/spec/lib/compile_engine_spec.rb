@@ -542,6 +542,22 @@ describe CompileEngine do
           expect(eng.to_s).to eq(expected(input))
         end
 
+        it "handles function calls with passed objects" do
+          input = <<-EOF
+            class Foo {
+              function Bar main() {
+                var Bar b;
+                let b = Bar.new();
+                do b.jump();
+                return b;
+              }
+            }
+          EOF
+
+          eng = get_eng(input)
+          expect(eng.to_s).to eq(expected(input))
+        end
+
         it "handles function call expression with multiple arguments" do
           input = <<-EOF
             class Foo {
@@ -993,24 +1009,21 @@ describe CompileEngine do
     end
   end
 
-
-
-
   describe "samples" do
     {
       'seven' => 'Seven/Main.vm',
       'convert' => 'ConvertToBin/Main.vm',
 
-      #'square_main' => 'Square/Main.vm',
+      'square_main' => 'Square/Main.vm',
       'square_square' => 'Square/Square.vm',
-      #'square_game' => 'Square/SquareGame.vm',
+      'square_game' => 'Square/SquareGame.vm',
 
       'avg' => 'Average/Main.vm',
 
       'pong_ball' => 'Pong/Ball.vm',
       'pong_bat' => 'Pong/Bat.vm',
-      #'pong_main' => 'Pong/Main.vm',
-      #'pong_game' => 'Pong/PongGame.vm',
+      'pong_main' => 'Pong/Main.vm',
+      'pong_game' => 'Pong/PongGame.vm',
 
       'arrays' => 'ComplexArrays/Main.vm',
     }.each do |name, vm_input|
