@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'symbol_table'
-
   #'int' => nil,
   #'char' => nil,
   #'boolean' => nil,

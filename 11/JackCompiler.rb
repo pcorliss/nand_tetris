@@ -4,6 +4,7 @@ require 'pathname'
 require 'rexml/document'
 require_relative 'lib/tokenizer'
 require_relative 'lib/compile_engine'
+require_relative 'lib/symbol_table'
 
 path = Pathname.new(ARGV[0])
 
@@ -17,12 +18,12 @@ files.each do |file_name|
   fh = File.new(file_name)
   t = Tokenizer.new(fh)
   t.strip!
-  ce =CompileEngine.new(t.types, REXML::Document.new)
+  ce =CompileEngine.new(t.types)
   ce.process!
 
-  xml_str = ce.to_s(strip_whitespace: true, newlines: true, fix_empty: true)
-  output_file = file_name.to_s.sub(/\.jack$/,'.xml')
+  out_str = ce.to_s
+  output_file = file_name.to_s.sub(/\.jack$/,'.vm2')
   File.open(output_file, 'w') do |fh_out|
-    fh_out.write xml_str
+    fh_out.write out_str
   end
 end
