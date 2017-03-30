@@ -28,7 +28,7 @@ SUB_LOOKUP = {
   'let' => 'compile_let',
   'do' => 'compile_do',
   'if' => 'compile_if',
-  'else' => 'compile_else',
+  #'else' => 'compile_else',
   'while' => 'compile_while',
   'return' => 'compile_return',
 }
@@ -77,6 +77,7 @@ class CompileEngine
     @class_symbols = SymbolTable.new
     @var_count = {}
     @if_counter = 0
+    @while_counter = 0
   end
 
   def process!
@@ -174,6 +175,8 @@ class CompileEngine
     i = evaluate_until('}', SUB_LOOKUP, i) # class blah {
 
     @var_count[function_name] = @sub_symbols.count('var')
+    @if_counter = 0
+    @while_counter = 0
     i + 1
   end
 
@@ -431,7 +434,33 @@ class CompileEngine
     i += 1
   end
 
-  def compile_while
+  def compile_while(idx)
+    while_exp = "WHILE_EXP#{@while_counter}"
+    while_end = "WHILE_END#{@while_counter}"
+    @while_counter += 1
+
+    i = idx
+    _, _ = get_token(i) # while
+    i += 1
+    _, _ = get_token(i) # (
+    i += 1
+
+    write "label #{while_exp}"
+    #put_status(i)
+    i = compile_expression(i, ')')
+    i += 1
+
+    write "not"
+    write "if-goto #{while_end}"
+
+    _, _ = get_token(i) # {
+    i += 1
+    i = evaluate_until('}', SUB_LOOKUP, i) # if() {
+    i += 1
+
+    write "goto #{while_exp}"
+    write "label #{while_end}"
+    i
   end
 
   def compile_if(idx)
@@ -476,9 +505,6 @@ class CompileEngine
     end
 
     i
-  end
-
-  def compile_else
   end
 
   def write(element)

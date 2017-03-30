@@ -853,9 +853,81 @@ describe CompileEngine do
         expect(eng.to_s).to eq(expected(input))
       end
 
-    end
-    describe "while statements" do
+      it "reuses if statement counters for each subroutine" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              if (1 = 1) {
+                return 2;
+              }
+              return 3;
+            }
+            function int foo() {
+              if (4 = 4) {
+                return 5;
+              }
+              return 6;
+            }
+          }
+        EOF
 
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
+    end
+
+    describe "while statements" do
+      it "handles while statements" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              while (1 = 1) {
+                return 2;
+              }
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles multiple while statements" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              while (1 = 1) {
+                while (2 = 2) {
+                  return 3;
+                }
+              }
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "reuses while statement counters for each subroutine" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              while (1 = 1) {
+                return 2;
+              }
+            }
+            function int foo() {
+              while (2 = 2) {
+                return 3;
+              }
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
     end
   end
 
@@ -865,7 +937,7 @@ describe CompileEngine do
   describe "samples" do
     {
       'seven' => 'Seven/Main.vm',
-      #'convert' => 'ConvertToBin/Main.vm',
+      'convert' => 'ConvertToBin/Main.vm',
 
       #'square_main' => 'Square/Main.vm',
       #'square_square' => 'Square/Square.vm',
