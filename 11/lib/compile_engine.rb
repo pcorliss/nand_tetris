@@ -166,6 +166,13 @@ class CompileEngine
     # Need to look ahead for var dec, using a block set at output time
     func = function_name # we can't use the class instance var here because it will get eaten
     write(lambda { "function #{class_name}.#{func} #{@var_count[func]}" })
+
+    if @sub_type == 'constructor'
+      write "push constant #{@class_symbols.count}"
+      write "call Memory.alloc 1"
+      write "pop pointer 0"
+    end
+
     if @sub_type == 'method'
       write "push argument 0"
       write "pop pointer 0"

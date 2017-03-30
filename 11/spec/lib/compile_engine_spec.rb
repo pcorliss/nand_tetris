@@ -118,6 +118,26 @@ describe CompileEngine do
       expect(eng.to_s).to eq(expected(input))
     end
 
+    it "allocates memory if a constructor" do
+      input = <<-EOF
+        class Foo {
+          field int x, y;
+          field Array z;
+
+          constructor Foo main() {
+            let x = 1;
+            let y = 2;
+            let z = Array.new(1);
+            return this;
+          }
+        }
+      EOF
+
+      eng = get_eng(input)
+      expect(eng.to_s).to include('push constant 3', 'call Memory.alloc 1')
+      expect(eng.to_s).to eq(expected(input))
+    end
+
     it "handles multiple functions" do
       input = <<-EOF
         class Foo {
@@ -982,13 +1002,13 @@ describe CompileEngine do
       'convert' => 'ConvertToBin/Main.vm',
 
       #'square_main' => 'Square/Main.vm',
-      #'square_square' => 'Square/Square.vm',
+      'square_square' => 'Square/Square.vm',
       #'square_game' => 'Square/SquareGame.vm',
 
       'avg' => 'Average/Main.vm',
 
-      #'pong_ball' => 'Pong/Ball.vm',
-      #'pong_bat' => 'Pong/Bat.vm',
+      'pong_ball' => 'Pong/Ball.vm',
+      'pong_bat' => 'Pong/Bat.vm',
       #'pong_main' => 'Pong/Main.vm',
       #'pong_game' => 'Pong/PongGame.vm',
 
