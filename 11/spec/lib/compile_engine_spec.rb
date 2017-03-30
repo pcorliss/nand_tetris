@@ -298,6 +298,20 @@ describe CompileEngine do
         #expect(eng.to_s).to include('push local 0')
         expect(eng.to_s).to eq(expected(input))
       end
+
+      it "handles string output" do
+        input = <<-EOF
+          class Foo {
+            method String main() {
+              return "foo";
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
+
       it "handles basic subtraction expression" do
         input = <<-EOF
           class Foo {
@@ -943,7 +957,7 @@ describe CompileEngine do
       #'square_square' => 'Square/Square.vm',
       #'square_game' => 'Square/SquareGame.vm',
 
-      #'avg' => 'Average/Main.vm',
+      'avg' => 'Average/Main.vm',
 
       #'pong_ball' => 'Pong/Ball.vm',
       #'pong_bat' => 'Pong/Bat.vm',

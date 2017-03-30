@@ -307,6 +307,16 @@ class CompileEngine
     write 'pop that 0'
   end
 
+  def write_string(str)
+    write "push constant #{str.length}"
+    write "call String.new 1"
+
+    str.each_char do |char|
+      write "push constant #{char.ord}"
+      write "call String.appendChar 2"
+    end
+  end
+
   def write_element(action, element)
     #puts "E: #{element}"
     if element.first == 'function'
@@ -323,6 +333,12 @@ class CompileEngine
     end
     out = action + " "
     type, token = element
+
+    if type == 'stringConstant'
+      write_string(element.last)
+      return
+    end
+
     if type == 'integerConstant'
       out << "constant #{token}"
     elsif type == 'keyword'
