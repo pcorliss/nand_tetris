@@ -22,7 +22,7 @@ files.each do |file_name|
   ce.process!
 
   out_str = ce.to_s
-  output_file = file_name.to_s.sub(/\.jack$/,'.vm2')
+  output_file = file_name.to_s.sub(/\.jack$/,'.vm')
   File.open(output_file, 'w') do |fh_out|
     fh_out.write out_str
   end
