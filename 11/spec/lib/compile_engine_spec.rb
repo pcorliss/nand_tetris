@@ -640,8 +640,130 @@ describe CompileEngine do
     end
 
     describe "let statements" do
-      #it "allows setting an array element"
-      #it "allows setting a nested array element"
+      it "sets a variable to a constant" do
+        input = <<-EOF
+          class Foo {
+            function void main() {
+              var int foo;
+              let foo = 9;
+              return;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "sets a variable to a complicated expression" do
+        input = <<-EOF
+          class Foo {
+            function void main() {
+              var int foo;
+              let foo = 1 + (2 * (3 - 4));
+              return;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "sets a variable to the results of an array" do
+        input = <<-EOF
+          class Foo {
+            function void main() {
+              var int foo;
+              var Array a;
+              let foo = a[4];
+              return;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "sets a variable to the results of a function" do
+        input = <<-EOF
+          class Foo {
+            function void main() {
+              var int foo;
+              let foo = Bar.foo();
+              return;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "sets a variable to the results of a method" do
+        input = <<-EOF
+          class Foo {
+            method void main() {
+              var int foo;
+              let foo = bar();
+              return;
+            }
+
+            method int bar() {
+              return 1;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "allows setting an array element to a constant" do
+        input = <<-EOF
+          class Foo {
+            function void main() {
+              var Array a;
+              let a[4] = 8;
+              return;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "allows setting an array element to another array value" do
+        input = <<-EOF
+          class Foo {
+            function void main() {
+              var Array a, b;
+              let a[4] = b[8];
+              return;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "allows setting a nested array element" do
+        input = <<-EOF
+          class Foo {
+            function void main() {
+              var Array a, b, c, d;
+              let a[b[7]] = c[d[9]];
+              return;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
     end
 
     describe "do statements" do
@@ -668,11 +790,6 @@ describe CompileEngine do
 
 
   describe "samples" do
-    def strip(str)
-      # remove trailing new line and left align content
-    end
-
-
     {
       'seven' => 'Seven/Main.vm',
       #'convert' => 'ConvertToBin/Main.vm',

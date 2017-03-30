@@ -197,7 +197,25 @@ class CompileEngine
 
   def compile_let(idx)
     i = idx
+    _, _ = get_token(i) # let
     i += 1
+    #_, token = get_token(i) # var to set
+    i, var_elements = gather_expressions(i, '=')
+    i += 1
+
+    if var_elements.first == 'array'
+      write_array_let_prefix(var_elements)
+    end
+
+    i = compile_expression(i, ';')
+
+    if is_token?(var_elements)
+      write "pop #{lookup_symbol(var_elements.last).write_symbol}"
+    else
+      #puts "VarElements: #{var_elements}"
+      write_array_let_suffix(var_elements)
+      #write_array(var_elements)
+    end
     i
   end
 
@@ -263,6 +281,26 @@ class CompileEngine
     write 'add'
     write 'pop pointer 1'
     write 'push that 0'
+  end
+
+  def write_array_let_prefix(element)
+    #puts "ArrayWrite: #{element.inspect}"
+    _, array_symbol, exps = element
+    #puts "ArrayWrite: #{element.inspect} #{array_symbol.inspect} #{exps.inspect}"
+    write_expression(exps)
+    write "push #{lookup_symbol(array_symbol.last).write_symbol}"
+    write 'add'
+  end
+
+  def write_array_let_suffix(element)
+    #puts "ArrayWrite: #{element.inspect}"
+    #_, array_symbol, exps = element
+    #puts "ArrayWrite: #{element.inspect} #{array_symbol.inspect} #{exps.inspect}"
+    #write_expression(exps)
+    write 'pop temp 0'
+    write 'pop pointer 1'
+    write 'push temp 0'
+    write 'pop that 0'
   end
 
   def write_element(action, element)
