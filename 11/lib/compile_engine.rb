@@ -258,7 +258,7 @@ class CompileEngine
     exps = []
     args.each do |e|
       #puts "Element: #{e.inspect} #{e.last} #{e.last == ','}"
-      if e.last == ','
+      if !e.is_a?(String) && e.last == ',' # Handles function calls and arrays
         #puts "Writing: #{exps.inspect}"
         write_expression(exps)
         exps = []

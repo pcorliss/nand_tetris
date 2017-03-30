@@ -555,6 +555,19 @@ describe CompileEngine do
           eng = get_eng(input)
           expect(eng.to_s).to eq(expected(input))
         end
+
+        it "handles function calls with functions as arguments" do
+          input = <<-EOF
+            class Foo {
+              function int main() {
+                return Bar.foo(Bar.bar(4));
+              }
+            }
+          EOF
+
+          eng = get_eng(input)
+          expect(eng.to_s).to eq(expected(input))
+        end
       end
 
       context "array access" do
@@ -614,6 +627,21 @@ describe CompileEngine do
           eng = get_eng(input)
           expect(eng.to_s).to eq(expected(input))
         end
+
+        it "handles function calls with arrays as arguments" do
+          input = <<-EOF
+            class Foo {
+              function int main() {
+                var Array a;
+                return Bar.foo(a[2]);
+              }
+            }
+          EOF
+
+          eng = get_eng(input)
+          expect(eng.to_s).to eq(expected(input))
+        end
+
       end
     end
 
@@ -964,7 +992,7 @@ describe CompileEngine do
       #'pong_main' => 'Pong/Main.vm',
       #'pong_game' => 'Pong/PongGame.vm',
 
-      #'arrays' => 'ComplexArrays/Main.vm',
+      'arrays' => 'ComplexArrays/Main.vm',
     }.each do |name, vm_input|
       it "has identical output for #{name}" do
         jack_file = vm_input.sub('.vm', '.jack')
