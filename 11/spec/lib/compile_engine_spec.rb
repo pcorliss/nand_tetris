@@ -562,7 +562,7 @@ describe CompileEngine do
           input = <<-EOF
             class Foo {
               method int main() {
-                return foo(0, 1) + Foo.bar(2);
+                return foo(0, 1) + Bar.bar(2);
               }
 
               method int foo(int i, int j) {
