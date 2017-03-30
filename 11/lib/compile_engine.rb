@@ -76,6 +76,7 @@ class CompileEngine
     @lines = []
     @class_symbols = SymbolTable.new
     @var_count = {}
+    @if_counter = 0
   end
 
   def process!
@@ -433,7 +434,48 @@ class CompileEngine
   def compile_while
   end
 
-  def compile_if
+  def compile_if(idx)
+    if_true = "IF_TRUE#{@if_counter}"
+    if_false = "IF_FALSE#{@if_counter}"
+    if_end = "IF_END#{@if_counter}"
+    @if_counter += 1
+
+    i = idx
+    _, _ = get_token(i) # if
+    i += 1
+    _, _ = get_token(i) # (
+    i += 1
+    #put_status(i)
+    i = compile_expression(i, ')')
+    i += 1
+    _, _ = get_token(i) # {
+    i += 1
+
+    write "if-goto #{if_true}"
+    write "goto #{if_false}"
+    write "label #{if_true}"
+
+    #put_status(i)
+    #i = compile_expression(i, '}')
+    i = evaluate_until('}', SUB_LOOKUP, i) # if() {
+    i += 1
+
+    _, maybe_else = get_token(i)
+    else_statement = (maybe_else == 'else')
+
+    write "goto #{if_end}" if else_statement
+    write "label #{if_false}"
+
+    if else_statement
+      i += 1
+      _, _ = get_token(i) # {
+      i += 1
+      i = evaluate_until('}', SUB_LOOKUP, i) # else {
+      i += 1
+      write "label #{if_end}"
+    end
+
+    i
   end
 
   def compile_else

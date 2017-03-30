@@ -782,8 +782,81 @@ describe CompileEngine do
       end
     end
 
-    describe "if/else statements"
-    describe "while statements"
+    describe "if/else statements" do
+      it "handles if statements" do
+        input = <<-EOF
+          class Foo {
+            function void main() {
+              if (1 = 1) {
+                return;
+              }
+              return;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "creates unique labels" do
+        input = <<-EOF
+          class Foo {
+            function void main() {
+              if (1 = 1) {
+                return;
+              }
+              if (2 = 2) {
+                return;
+              }
+              return;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles nested ifs" do
+        input = <<-EOF
+          class Foo {
+            function void main() {
+              if (1 = 1) {
+                if (2 = 2) {
+                  return;
+                }
+              }
+              return;
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+      it "handles else statements" do
+        input = <<-EOF
+          class Foo {
+            function int main() {
+              if (1 = 1) {
+                return 2;
+              } else {
+                return 1;
+              }
+            }
+          }
+        EOF
+
+        eng = get_eng(input)
+        expect(eng.to_s).to eq(expected(input))
+      end
+
+    end
+    describe "while statements" do
+
+    end
   end
 
 
