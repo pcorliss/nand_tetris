@@ -91,20 +91,18 @@ class Math {
 
     /** Returns the integer part of the square root of x. */
     function int sqrt(int x) {
-      var int y;
+      var int y, j, approx;
 
       let y = 0;
-      while(y < 182){
-        if(y * y > x){
-          return y - 1;
+      let j = 7; // middle bit
+      while(j > -1) {
+        let approx = y + twos[j];
+        if (~(approx * approx > x) & (approx * approx > 0)) {
+          let y = approx;
         }
-        if(y * y = x) {
-          return y;
-        }
-
-        let y = y + 1;
+        let j = j - 1;
       }
-      return y - 1;
+      return y;
     }
 
     /** Returns the greater number. */
