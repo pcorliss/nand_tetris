@@ -16,11 +16,10 @@ class Math {
 
     /** Returns the absolute value of x. */
     function int abs(int x) {
-      var int out;
       if (x < 0) {
-        let out = 0-x;
+        return -x;
       }
-      return out;
+      return x;
     }
 
     /** Returns the product of x and y. 
@@ -89,18 +88,20 @@ class Math {
 
     /** Returns the integer part of the square root of x. */
     function int sqrt(int x) {
-      var int out;
+      var int y;
 
-      let out = 0;
-      while(x > (out * out)) {
-        let out = out + 1;
-      }
+      let y = 0;
+      while(y < 182){
+        if(y * y > x){
+          return y - 1;
+        }
+        if(y * y = x) {
+          return y;
+        }
 
-      if((out * out) = x){
-        return out;
-      } else {
-        return out - 1;
+        let y = y + 1;
       }
+      return y - 1;
     }
 
     /** Returns the greater number. */
