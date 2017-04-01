@@ -9,11 +9,18 @@
  * consists of 32,768 words, each holding a 16-bit binary number.
  */
 class Memory {
-    static Array ram;
+    static Array ram, freeList;
+    static int next, size;
 
     /** Initializes the class. */
     function void init() {
       let ram = 0;
+      let next = 0;
+      let size = 1;
+      let freeList = 2048;
+      let freeList[next] = 0;
+      let freeList[size] = 16384 - freeList - 1; // 14335
+
       return;
     }
 
@@ -28,15 +35,52 @@ class Memory {
       return;
     }
 
+    function Array firstFit(int requestedSize) {
+      var Array segment;
+      let segment = freeList;
+
+      while(segment[size] < requestedSize){
+        let segment = freeList[next];
+        if (segment = 0) { return 0; }
+      }
+      return segment;
+    }
+
+    // smallest fit
+    function int bestFit(int requestedSize) {
+      return 0;
+    }
+
     /** Finds an available RAM block of the given size and returns
      *  a reference to its base address. */
-    function int alloc(int size) {
-      return 0;
+    function int alloc(int requestedSize) {
+      var Array segment, block;
+      var int remainingSize;
+
+      let segment = Memory.firstFit(requestedSize + 2);
+      if (segment = 0) { return 0; }
+      let remainingSize = segment[size] - (requestedSize + 2);
+
+      let block = (segment + 2 + segment[size]) - (requestedSize + 2);
+      let block[size] = requestedSize;
+
+      let segment[size] = remainingSize;
+
+      return block + 2;
+      /*return 2048;*/
     }
 
     /** De-allocates the given object (cast as an array) by making
      *  it available for future allocations. */
     function void deAlloc(Array o) {
+      var Array segment;
+
+      let segment = freeList;
+      while(~(segment[next] = 0)){
+        let segment = segment[next];
+      }
+
+      let segment[next] = o - 2;
       return;
     }
 }
