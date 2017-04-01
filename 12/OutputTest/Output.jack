@@ -192,6 +192,8 @@ class Output {
     /** Moves the cursor to the j-th column of the i-th row,
      *  and erases the character displayed there. */
     function void moveCursor(int i, int j) {
+      var int address, val, i, shift;
+
       // 23 chars tall x 64 chars wide
       // char is 11 pixels tall and 8 pixels wide
       let cursor_x = j;
@@ -200,12 +202,23 @@ class Output {
       if(cursor > 1471){
         // cursor overflow
         do Output.moveCursor(0, 0);
+        return;
       }
 
-      /*do Output.printChar(" "); // TODO print space?*/
-      /*let cursor_x = i;*/
-      /*let cursor_y = j;*/
-      /*let cursor = cursor_y * 23 + cursor_x;*/
+      if(Output.shifted()){
+        let shift = 255; // first 8-bits set
+      } else {
+        let shift = -32512; // last 8-bits set -32767 + 255
+      }
+
+      let i = 0;
+      while(i < 11) {
+        let address = Output.getCursorAddress(i);
+        let val = shift & Memory.peek(address);
+        do Memory.poke(address, val);
+        let i = i + 1;
+      }
+
       return;
     }
 
@@ -219,28 +232,30 @@ class Output {
       return ~((twos[i] & n) = 0);
     }
 
+    function boolean shifted() {
+      return Output.modulus(cursor_x, 2) = 1;
+    }
+
+    function int getCursorAddress(int i) {
+      // 352 == 512/16 * 11 : 512px wide, 16 pixels/word, 11 rows tall
+      return (352 * cursor_y) + (cursor_x / 2) + (i * 32) + screen;
+    }
+
     /** Displays the given character at the cursor location,
      *  and advances the cursor one column forward. */
     function void printChar(char c) {
       var Array charMap;
       var int i, j, val, address, sum;
-      var boolean shifted;
-
-      let shifted = false;
-      if (Output.modulus(cursor_x, 2) = 1) {
-        let shifted = true;
-      }
 
       let charMap = Output.getMap(c);
 
       let i = 0;
       while(i < 11) {
-        // 352 == 512/16 * 11 : 512px wide, 16 pixels/word, 11 rows tall
-        let address = (352 * cursor_y) + (cursor_x / 2) + (i * 32) + screen;
+        let address = Output.getCursorAddress(i);
         let val = charMap[i];
         // 16-bit word segments but 6-bit char segments
         // need to shift them over 8-bits half the time
-        if(shifted){
+        if(Output.shifted()){
           let j = 0;
           let sum = 0;
           while(j < 6){
