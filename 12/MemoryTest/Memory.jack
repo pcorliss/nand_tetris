@@ -48,7 +48,17 @@ class Memory {
 
     // smallest fit
     function int bestFit(int requestedSize) {
-      return 0;
+      var Array segment, smallest;
+      let smallest = freeList;
+      let segment = freeList;
+      while(~(segment[next] = 0)){
+        // segment.size < smallest.size & segment.size >= requestedSize
+        if ((segment[size] < smallest[size]) & (~(segment[size] < requestedSize))) {
+          let smallest = segment;
+        }
+        let segment = segment[next];
+      }
+      return smallest;
     }
 
     /** Finds an available RAM block of the given size and returns
@@ -57,8 +67,11 @@ class Memory {
       var Array segment, block;
       var int remainingSize;
 
-      let segment = Memory.firstFit(requestedSize + 2);
+      let segment = Memory.bestFit(requestedSize + 2);
       if (segment = 0) { return 0; }
+
+      // there's a subtle bug here where we're leaking some allocated memory
+      // leaving small blocks with ever shrinking sizes
       let remainingSize = segment[size] - (requestedSize + 2);
 
       let block = (segment + 2 + segment[size]) - (requestedSize + 2);
