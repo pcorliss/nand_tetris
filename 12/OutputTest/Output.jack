@@ -288,7 +288,10 @@ class Output {
 
     /** Advances the cursor to the beginning of the next line. */
     function void println() {
-      do Output.moveCursor(cursor_y + 1, 0);
+      if(cursor_x = 0) { do Output.advance(); }
+      while(~(cursor_x = 0)){
+        do Output.advance();
+      }
       return;
     }
 
