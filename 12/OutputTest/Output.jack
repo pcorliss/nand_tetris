@@ -277,6 +277,12 @@ class Output {
     /** displays the given string starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printString(String s) {
+      var int i;
+      let i = 0;
+      while(i < s.length()){
+        do Output.printChar(s.charAt(i));
+        let i = i + 1;
+      }
       return;
     }
 
@@ -311,7 +317,7 @@ class Output {
 
     /** Moves the cursor one column forward. */
     function void advance() {
-      if(cursor_x = 22){
+      if(cursor_x = 63){
         do Output.moveCursor(cursor_y + 1, 0);
       } else {
         do Output.moveCursor(cursor_y, cursor_x + 1);
@@ -322,7 +328,7 @@ class Output {
     /** Moves the cursor one column back. */
     function void backSpace() {
       if(cursor_x = 0){
-        do Output.moveCursor(cursor_y - 1, 22);
+        do Output.moveCursor(cursor_y - 1, 63);
       } else {
         do Output.moveCursor(cursor_y, cursor_x - 1);
       }
