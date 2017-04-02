@@ -283,6 +283,20 @@ class Output {
     /** Displays the given integer starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printInt(int i) {
+      if(i < 0){
+        do Output.printChar(45);
+        let i = -i;
+      }
+
+      if(i > 9){
+        // we need to print the biggest digit first
+        // recursive call here to accomplish that
+        do Output.printInt(i / 10);
+        do Output.printChar(Output.modulus(i ,10) + 48);
+      } else {
+        do Output.printChar(i + 48);
+      }
+
       return;
     }
 
