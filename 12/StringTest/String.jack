@@ -46,7 +46,9 @@ class String {
     /** Sets the character at the j-th location of this string to c. */
     method void setCharAt(int j, char c) {
       let chars[j] = c;
-      let end = j + 1;
+      if(j > (end - 1)){
+        let end = j + 1;
+      }
       return;
     }
 
@@ -65,43 +67,30 @@ class String {
     /** Returns the integer value of this string, 
      *  until a non-digit character is detected. */
     method int intValue() {
-      var int i, j, sum, c, mult;
+      var int val, i, d;
       var boolean negative;
-      var Array ints;
 
-      let i = 0;
       let negative = false;
-      let ints = Array.new(end);
-      let j = 0;
-      let mult = 1;
+      let val = 0;
+      let i = 0;
+
       while(i < end){
-        let c = charAt(i);
-        if(((c < 58) & (c > 47)) | (c = 45)){
-          if(c = 45){
-            let negative = true;
-          } else {
-            let ints[j] = c - 48;
-            let j = j + 1;
-            let mult = mult * 10;
-          }
+        let d = charAt(i) - 48;
+        if(d = -3){
+          let negative = true;
         } else {
-          return sum;
+          if(d > -1 & d < 10){
+            let val = val * 10 + d;
+          } else {
+            let i = end;
+          }
         }
         let i = i + 1;
       }
 
-      let i = 0;
-      let sum = 0;
-      while(i < j){
-        let sum = sum + (ints[i] * mult);
-        let mult = mult / 10;
-        let i = i + 1;
-      }
+      if(negative){ return -val; }
 
-      if(negative){
-        return -sum;
-      }
-      return sum;
+      return val;
     }
 
     // modulus or % operator
